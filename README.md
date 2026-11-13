@@ -6,10 +6,10 @@ Simulateur de survie et de développement d'une civilisation, de la survie primi
 
 ## Jouer
 
+- ▶ **Le survivant (palier 3, 3D)** : [`jeu.html`](jeu.html) — Arok, seul au bord d'un lac, à l'âge de pierre. Voir [`docs/jeu-3d.md`](docs/jeu-3d.md).
 - **Prototype actuel (démo 3, ancien concept RTS)** : [`prototypes/demo3-rts/`](prototypes/demo3-rts/index.html) — décor 3D, caméra, brouillard d'exploration, tribu animée, feu à entretenir.
 - **Réseau du référentiel (palier 1)** : [`vues/reseau.html`](vues/reseau.html) — besoins, ressources, techniques et procédés de la survie primitive, avec leur validation.
 - **Console de simulation (palier 2)** : [`vues/simulation.html`](vues/simulation.html) — le survivant solitaire sans 3D : besoins, actions, découvertes, IA autonome. Voir [`docs/moteur.md`](docs/moteur.md).
-- Le jeu en 3D réutilisera ce moteur au palier 3.
 
 Aucune installation : ouvrir `index.html` dans un navigateur récent (connexion internet nécessaire pour charger Babylon.js), ou via GitHub Pages.
 

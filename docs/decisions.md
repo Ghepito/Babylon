@@ -28,6 +28,7 @@ Source : [`conception-ia-externe.md`](conception-ia-externe.md) (synthèse du 13
 | 20 | Méthode | Jouabilité rapide, concepts testés palier par palier (13/11/2026) |
 | 21 | Outillage | Dépôt GitHub `Ghepito/Babylon` (13/11/2026) |
 | 22 | Moteur 3D | Babylon.js dans le navigateur (Unreal écarté, jugé trop complexe) |
+| 25 | Moteur (palier 2) | Validé avec les réglages du 13/11 ; passage au palier 3 (3D) |
 | 24 | Réglages | Cueillette plus lente ; limite de transport ; charge du feu (×2, ×3 bûches) pour tenir la nuit (13/11/2026) |
 | 23 | Référentiel V1 | Structure, contenu de la phase 1 et vue réseau validés en l'état (13/11/2026) ; valeurs numériques toujours provisoires |
 
@@ -40,4 +41,5 @@ Source : [`conception-ia-externe.md`](conception-ia-externe.md) (synthèse du 13
 - Contenu de la phase 1 : 81 éléments (6 besoins, 8 sources, 10 ressources, 3 objets, 3 installations, 11 compétences, 9 techniques, 6 connaissances, 25 procédés) — voir `referentiel/donnees/phase1/`.
 - Valeurs numériques (durées, quantités, baisses des besoins) : provisoires, à calibrer en jouant.
 - Moteur (palier 2) : échelle de temps 1 s réelle = 1 min de jeu, règles de besoins, de santé, d'expérience et de découverte, IA par objectifs — voir [`moteur.md`](moteur.md).
+- Jeu 3D (palier 3) : marche réelle jusqu'aux lieux (le temps de jeu passe pendant la marche), 3,2 m par seconde réelle à ×1 ; carte et ergonomie — voir [`jeu-3d.md`](jeu-3d.md).
 - Découpage en paliers : voir [`feuille-de-route.md`](feuille-de-route.md).

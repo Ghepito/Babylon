@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Babylon — Le survivant</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--gold:#e8c27a;--gold2:#b8893f;--ink:#f3ead8;--panel:rgba(22,17,12,.84);--line:rgba(232,194,122,.32);--muted:rgba(243,234,216,.6)}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:#0d0b09;font:14px/1.4 Inter,system-ui,sans-serif;color:var(--ink);user-select:none}
+  #c{position:fixed;inset:0;width:100%;height:100%;outline:none;touch-action:none}
+  .panel{position:fixed;background:var(--panel);border:1px solid var(--line);border-radius:10px;backdrop-filter:blur(6px);box-shadow:0 8px 30px rgba(0,0,0,.4);z-index:5}
+  button{padding:5px 9px;border-radius:7px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);font:12.5px Inter,sans-serif;cursor:pointer}
+  button:hover{background:rgba(232,194,122,.2)} button.on{background:rgba(232,194,122,.32);border-color:var(--gold)}
+  .barre{height:7px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden;flex:1}
+  .barre i{display:block;height:100%;border-radius:4px;transition:width .25s}
+  .muted{color:var(--muted)}
+  #haut{top:10px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;padding:7px 14px;white-space:nowrap}
+  #haut .titre{font-family:Cinzel,serif;font-weight:800;letter-spacing:.18em;color:var(--gold);font-size:17px}
+  #haut .ere{font-family:Cinzel,serif;font-size:11.5px;opacity:.8;border-left:1px solid var(--line);padding-left:10px}
+  #horloge{font-weight:600;font-variant-numeric:tabular-nums;min-width:118px}
+  .groupe{display:flex;gap:3px}
+  label.chk{display:flex;gap:5px;align-items:center;font-size:12.5px;cursor:pointer}
+  #gauche{top:64px;left:10px;width:270px;padding:11px 13px}
+  #nom{font-family:Cinzel,serif;color:var(--gold);font-size:15px;margin-bottom:6px}
+  .besoin,#charge{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12.5px}
+  .besoin span,#charge span{width:62px}
+  .besoin b,#charge b{min-width:30px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+  #charge b{min-width:60px;font-size:11.5px}
+  .besoin.crit span{color:#ff9a8a}
+  #action{margin-top:9px;padding-top:8px;border-top:1px solid var(--line);font-size:13px}
+  #action .barre{margin-top:5px}
+  .motif{font-size:11.5px;color:var(--muted);margin-top:4px}
+  #droite{top:64px;right:10px;width:260px;padding:10px 12px;max-height:calc(100% - 250px);overflow:auto;font-size:12.5px}
+  #droite h4{margin:8px 0 3px;font-family:Cinzel,serif;color:var(--gold);font-size:12.5px;letter-spacing:.05em}
+  #droite h4:first-child{margin-top:0}
+  .liste{margin:0;padding:0;list-style:none}
+  .liste li{display:flex;justify-content:space-between;gap:6px;padding:2px 0;align-items:center}
+  .poser{padding:0 5px;margin-left:5px;font-size:11px}
+  .tag{display:inline-block;padding:1px 7px;border-radius:9px;font-size:11px;background:rgba(255,255,255,.08);margin:2px 3px 2px 0}
+  .tag.tech{background:rgba(91,143,214,.3)} .tag.con{background:rgba(155,127,224,.3)}
+  #bas{left:50%;bottom:10px;transform:translateX(-50%);width:min(980px,calc(100% - 600px));min-width:420px;padding:8px 10px}
+  #bas .entete{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-bottom:5px}
+  #actions{display:flex;flex-wrap:wrap;gap:4px;max-height:96px;overflow:auto}
+  .act{text-align:left;line-height:1.25}
+  .act small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+  .act.ko{opacity:.5} .act.ko small{color:#e8a08a}
+  .act.mini{padding:4px 8px;font-size:12px}
+  #journal{position:fixed;left:10px;bottom:10px;width:330px;max-height:200px;overflow:hidden;font-size:12px;z-index:4;padding:8px 10px;mask-image:linear-gradient(#000 70%,transparent)}
+  #journal div{padding:1px 0}
+  #journal .t{color:var(--muted);margin-right:5px;font-variant-numeric:tabular-nums}
+  #journal .decouverte,#journal .connaissance{color:#c9b6ff} #journal .mort,#journal .besoin_critique{color:#ff9a8a}
+  #journal .competence{color:#9fe0c0} #journal .feu_eteint,#journal .surcharge{color:#ffc27a}
+  #menu{display:none;width:290px;padding:9px 10px;max-height:70vh;overflow:auto;z-index:8}
+  #menu .titre{font-family:Cinzel,serif;color:var(--gold);font-size:14px;margin-bottom:6px}
+  #menu .x{float:right;cursor:pointer;opacity:.6}
+  #menu .info{font-size:12px;color:var(--muted);margin-bottom:6px}
+  #menu .act{display:block;width:100%;margin:4px 0}
+  #bulle{position:fixed;display:none;z-index:9;pointer-events:none;padding:4px 8px;border-radius:6px;background:rgba(15,11,8,.88);border:1px solid var(--line);font-size:12px}
+  #toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);padding:7px 14px;z-index:9;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:9px}
+  #annonces{position:fixed;top:28%;left:50%;transform:translateX(-50%);z-index:9;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:8px}
+  .annonce{padding:10px 22px;border-radius:12px;font:600 18px Cinzel,serif;letter-spacing:.03em;background:rgba(40,25,60,.86);border:1px solid #b9a1ff;color:#efe6ff;animation:entre .5s ease-out;transition:opacity .8s}
+  .annonce.alerte{background:rgba(60,25,10,.86);border-color:#e8a23a;color:#ffe2b0}
+  .annonce.mort{background:rgba(60,10,10,.9);border-color:#ff8a7a}
+  .annonce.part{opacity:0}
+  @keyframes entre{from{transform:translateY(12px) scale(.96);opacity:0}}
+  #aide{top:64px;left:50%;transform:translateX(-50%);width:420px;padding:12px 16px;font-size:12.5px;line-height:1.6;z-index:7}
+  #aide h3{margin:0 0 6px;font-family:Cinzel,serif;color:var(--gold);font-size:14px}
+  #aide kbd{display:inline-block;min-width:18px;padding:0 5px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;font:600 11px Inter;text-align:center;background:rgba(255,255,255,.06)}
+  #aide .x{float:right;cursor:pointer;opacity:.6}
+  .cache{display:none!important}
+  #mortBox{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:10;background:rgba(0,0,0,.45)}
+  #mortBox .panel{position:static;padding:20px 26px;text-align:center;max-width:420px}
+  #loading{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(#2a2015,#0d0b09);z-index:20;transition:opacity .8s}
+  #loading h1{font-family:Cinzel,serif;font-weight:800;letter-spacing:.35em;color:var(--gold);font-size:52px;margin:0}
+  #loading p{opacity:.7;letter-spacing:.1em} #err{color:#ff9a8a;max-width:520px;text-align:center}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="loading"><h1>BABYLON</h1><p id="loadmsg">Chargement…</p><div id="err"></div></div>
+
+<div id="haut" class="panel">
+  <span class="titre">BABYLON</span><span class="ere">Âge de pierre · le survivant</span>
+  <span id="horloge">—</span><span id="meteo" class="muted"></span>
+  <div class="groupe" id="vitesses"></div>
+  <label class="chk" title="Touche I"><input type="checkbox" id="ia"> IA autonome</label>
+  <button id="bSuivre" class="on" title="Touche F">🎥 Suivre</button>
+  <div class="groupe"><button id="bSauver">💾</button><button id="bCharger">📂</button><button id="bNouvelle" title="Nouvelle partie">↺</button><button id="bAide">❔</button></div>
+</div>
+
+<div id="gauche" class="panel">
+  <div id="nom">Arok</div>
+  <div id="besoins"></div>
+  <div id="charge"></div>
+  <div id="action"></div>
+</div>
+
+<div id="droite" class="panel">
+  <h4>Inventaire</h4><ul class="liste" id="inventaire"></ul>
+  <h4>Outils</h4><ul class="liste" id="objets"></ul>
+  <h4>Savoirs</h4><div id="savoirs"></div>
+  <h4>Compétences</h4><ul class="liste" id="competences"></ul>
+</div>
+
+<div id="bas" class="panel">
+  <div class="entete"><span>Actions connues — 🚶 = il ira sur place · Maj+clic = à la suite</span><span id="inconnues"></span></div>
+  <div id="actions"></div>
+</div>
+
+<div id="journal" class="panel"></div>
+<div id="menu" class="panel"></div>
+<div id="bulle"></div>
+<div id="toast"></div>
+<div id="annonces"></div>
+
+<div id="aide" class="panel cache">
+  <span class="x" id="aideX">✕</span>
+  <h3>Comment jouer</h3>
+  <div><b>Cliquer sur un élément</b> (lac, buisson, arbre, bois mort, prairie, galets, silex, feu, abri) : les actions possibles à cet endroit.</div>
+  <div><b>Cliquer sur Arok</b> : ce qu'il peut faire sur place (boire, manger, expérimenter…).</div>
+  <div><b>Cliquer au sol</b> : y aller. Les actions « 🚶 » le font marcher jusqu'au bon endroit.</div>
+  <div>Glisser : tourner autour · molette : zoom · <kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> : déplacer la vue · <kbd>A</kbd><kbd>E</kbd> : pivoter</div>
+  <div><kbd>Espace</kbd> pause · <kbd>F</kbd> suivre Arok · <kbd>I</kbd> IA autonome · <kbd>Échap</kbd> fermer</div>
+  <div class="muted" style="margin-top:6px">Le temps passe aussi pendant la marche. À ×1, une minute de jeu par seconde.</div>
+</div>
+
+<div id="mortBox"><div class="panel"><h2 style="font-family:Cinzel,serif;color:#ff9a8a;margin:0 0 8px">☠️ Fin de l'aventure</h2><p id="mortMsg"></p><button id="mortNouvelle">Recommencer</button></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/babylonjs@9.35.0/babylon.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/babylonjs-materials@9.35.0/babylon.skyMaterial.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/babylonjs-materials@9.35.0/babylon.waterMaterial.min.js"></script>
+<script type="module" src="src/jeu.js"></script>
+</body>
+</html>
