@@ -5,8 +5,8 @@ Le découpage en paliers ci-dessous est **PROPOSÉ**.
 
 | Palier | Objectif | Livrable jouable / vérifiable | Statut |
 |---|---|---|---|
-| 0 | Mise en place du dépôt | Structure, documentation, prototype démo 3 | En cours |
-| 1 | Référentiel V1 minimal | Schéma SQLite + ~40 éléments de la phase 1 (eau, baies, bois, silex, feu, abri…) + validateurs + export JSON + vue du réseau de dépendances | À RÉALISER |
+| 0 | Mise en place du dépôt | Structure, documentation, prototype démo 3 | Fait (13/11) |
+| 1 | Référentiel V1 minimal | Schéma SQLite + ~40 éléments de la phase 1 (eau, baies, bois, silex, feu, abri…) + validateurs + export JSON + vue du réseau de dépendances | Livré (13/11) — à valider |
 | 2 | Moteur de simulation (sans 3D) | Temps continu (pause, accélération), besoins vitaux, actions avec durée qui consomment et produisent, lots de ressources ; testé par scénarios automatiques | À RÉALISER |
 | 3 | Le survivant solitaire | Dans Babylon : un personnage boit, cueille, ramasse du bois, taille un silex, découvre le feu, construit un abri | À RÉALISER |
 | 4 | Découvertes et apprentissage | Compétences 0-100 et paliers, oubli léger, propriétés cachées découvertes par l'expérience | À RÉALISER |

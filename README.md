@@ -7,9 +7,19 @@ Simulateur de survie et de développement d'une civilisation, de la survie primi
 ## Jouer
 
 - **Prototype actuel (démo 3, ancien concept RTS)** : [`prototypes/demo3-rts/`](prototypes/demo3-rts/index.html) — décor 3D, caméra, brouillard d'exploration, tribu animée, feu à entretenir.
+- **Réseau du référentiel (palier 1)** : [`vues/reseau.html`](vues/reseau.html) — besoins, ressources, techniques et procédés de la survie primitive, avec leur validation.
 - Le nouveau jeu (simulateur de survie) sera construit dans `src/`, palier par palier.
 
 Aucune installation : ouvrir `index.html` dans un navigateur récent (connexion internet nécessaire pour charger Babylon.js), ou via GitHub Pages.
+
+## Référentiel
+
+```bash
+pip install pyyaml openpyxl
+python3 tools/referentiel.py      # construit, valide, exporte
+```
+
+Détails : [`referentiel/README.md`](referentiel/README.md).
 
 ## Méthode
 

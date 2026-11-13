@@ -1,0 +1,37 @@
+# Sources naturelles — phase 1 (PROPOSÉ)
+# attributs.stock : quantité disponible par source (lots), attributs.repousse : régénération (unités par jour de jeu)
+
+- id: src.lac
+  nom: Lac d'eau douce
+  attributs: {stock: illimite}
+
+- id: src.buisson_baies
+  nom: Buisson de baies
+  attributs: {stock: 6, unite_stock: kg, repousse_par_jour: 0.5, saison: [ete, automne]}
+
+- id: src.sous_bois
+  nom: Sous-bois humide
+  description: Sol forestier où poussent des champignons.
+  attributs: {stock: 3, unite_stock: kg, repousse_par_jour: 0.3, saison: [automne]}
+
+- id: src.bois_mort
+  nom: Bois mort au sol
+  description: Branches tombées, sèches si le temps l'est.
+  attributs: {stock: 20, unite_stock: kg, repousse_par_jour: 1}
+
+- id: src.arbre
+  nom: Arbre vivant
+  description: Fournit des branches vertes et du feuillage.
+  attributs: {stock: 40, unite_stock: kg, repousse_par_jour: 0.5}
+
+- id: src.prairie
+  nom: Prairie sèche
+  attributs: {stock: 10, unite_stock: kg, repousse_par_jour: 1, saison: [ete, automne]}
+
+- id: src.riviere_galets
+  nom: Lit de rivière à galets
+  attributs: {stock: illimite}
+
+- id: src.affleurement_silex
+  nom: Affleurement de silex
+  attributs: {stock: 200, unite_stock: kg}

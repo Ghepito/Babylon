@@ -1,0 +1,217 @@
+# Procédés — phase 1 (PROPOSÉ)
+# Un procédé applique une technique (met_en_oeuvre) avec des ressources, des outils et des conditions.
+# Son exécution dans le jeu est une « action ». Durées en secondes de jeu, quantités dans l'unité de l'élément.
+#
+# Clés : requiert (présence nécessaire), consomme, produit, utilise (outil non consommé),
+#        degrade (usure), satisfait / aggrave (besoins), debloque (connaissance acquise),
+#        entretient (installation), condition (JSON, ex. niveau de compétence).
+# utilise : un même « groupe » signifie « l'un OU l'autre » ; « optionnel: true » = bonus, non indispensable.
+
+# --- Eau et nourriture ----------------------------------------------------------
+- id: proc.puiser_eau
+  nom: Puiser de l'eau dans ses mains
+  met_en_oeuvre: tech.ramassage
+  duree: 5
+  requiert: [src.lac]
+  produit: {res.eau: 0.5}
+
+- id: proc.boire
+  nom: Boire
+  met_en_oeuvre: tech.gestes_vitaux
+  duree: 10
+  consomme: {res.eau: 0.5}
+  satisfait: {bes.soif: 25}
+
+- id: proc.cueillir_baies
+  nom: Cueillir des baies
+  met_en_oeuvre: tech.ramassage
+  duree: 60
+  requiert: [src.buisson_baies, con.plantes_comestibles]
+  produit: {res.baies: 0.2}
+
+- id: proc.manger_baies
+  nom: Manger des baies
+  met_en_oeuvre: tech.gestes_vitaux
+  duree: 30
+  consomme: {res.baies: 0.2}
+  satisfait: {bes.faim: 10}
+
+- id: proc.ramasser_champignons
+  nom: Ramasser des champignons
+  met_en_oeuvre: tech.ramassage
+  duree: 60
+  requiert: [src.sous_bois]
+  produit: {res.champignons: 0.2}
+
+- id: proc.manger_champignons
+  nom: Goûter des champignons
+  description: Nourrit un peu… mais certains rendent malade. On l'apprend en essayant.
+  met_en_oeuvre: tech.gestes_vitaux
+  duree: 30
+  consomme: {res.champignons: 0.2}
+  satisfait: {bes.faim: 5}
+  aggrave: {bes.sante: {quantite: 30, parametres: {probabilite: "propriete:res.champignons/biologique/toxicite"}}}
+  debloque: [con.champignons_toxiques]
+
+# --- Bois, végétaux, pierres ----------------------------------------------------
+- id: proc.ramasser_bois_sec
+  nom: Ramasser du bois mort
+  met_en_oeuvre: tech.ramassage
+  duree: 90
+  requiert: [src.bois_mort]
+  produit: {res.bois_sec: 2}
+
+- id: proc.ramasser_herbes
+  nom: Ramasser des herbes sèches
+  met_en_oeuvre: tech.ramassage
+  duree: 40
+  requiert: [src.prairie]
+  produit: {res.herbes_seches: 0.2}
+
+- id: proc.cueillir_feuillage
+  nom: Arracher du feuillage
+  met_en_oeuvre: tech.ramassage
+  duree: 60
+  requiert: [src.arbre]
+  produit: {res.feuillage: 1}
+
+- id: proc.ramasser_galet
+  nom: Choisir un galet
+  met_en_oeuvre: tech.ramassage
+  duree: 20
+  requiert: [src.riviere_galets]
+  produit: {res.galet: 1}
+
+- id: proc.ramasser_silex
+  nom: Ramasser des rognons de silex
+  met_en_oeuvre: tech.ramassage
+  duree: 60
+  requiert: [src.affleurement_silex]
+  produit: {res.silex_brut: 2}
+
+- id: proc.couper_branches
+  nom: Couper des branches vertes
+  met_en_oeuvre: tech.decoupe
+  duree: 120
+  requiert: [src.arbre]
+  utilise:
+    - {id: obj.eclat_tranchant, groupe: outil_coupant}
+    - {id: obj.biface, groupe: outil_coupant}
+  degrade: {obj.eclat_tranchant: 8, obj.biface: 2}
+  produit: {res.branches_vertes: 3}
+
+# --- Pierre ---------------------------------------------------------------------
+- id: proc.casser_silex
+  nom: Frapper un silex avec un galet
+  description: Expérimentation. Révèle que le silex cassé coupe.
+  met_en_oeuvre: tech.experimentation
+  duree: 120
+  utilise: [res.galet]
+  consomme: {res.silex_brut: 1}
+  produit:
+    res.eclats_silex: 4
+    obj.eclat_tranchant: {quantite: 1, parametres: {probabilite: 0.3}}
+  debloque: [con.silex_tranchant]
+
+- id: proc.tailler_eclats
+  nom: Tailler des éclats tranchants
+  met_en_oeuvre: tech.taille_percussion
+  duree: 180
+  utilise: [res.galet]
+  consomme: {res.silex_brut: 1}
+  produit: {obj.eclat_tranchant: 3, res.eclats_silex: 5}
+
+- id: proc.faconner_biface
+  nom: Façonner un biface
+  met_en_oeuvre: tech.faconnage_bifacial
+  duree: 600
+  utilise: [res.galet]
+  consomme: {res.silex_brut: 1.5}
+  produit: {obj.biface: 1, res.eclats_silex: 10}
+  condition: {competence: comp.taille, min: 25}
+
+# --- Feu ------------------------------------------------------------------------
+- id: proc.frotter_bois
+  nom: Frotter deux bois l'un contre l'autre
+  description: Expérimentation. Le bois chauffe, fume…
+  met_en_oeuvre: tech.experimentation
+  duree: 120
+  consomme: {res.bois_sec: 0.5}
+  debloque: [con.frottement_chaleur]
+
+- id: proc.essai_braise
+  nom: Faire tomber la braise dans des herbes sèches
+  description: Expérimentation. Les herbes s'enflamment et le bois prend.
+  met_en_oeuvre: tech.experimentation
+  duree: 180
+  requiert: [con.frottement_chaleur]
+  consomme: {res.herbes_seches: 0.1, res.bois_sec: 0.5}
+  debloque: [con.combustion]
+
+- id: proc.fabriquer_necessaire_feu
+  nom: Fabriquer un foret et une planchette
+  met_en_oeuvre: tech.decoupe
+  duree: 300
+  utilise:
+    - {id: obj.eclat_tranchant, groupe: outil_coupant}
+    - {id: obj.biface, groupe: outil_coupant}
+  degrade: {obj.eclat_tranchant: 8, obj.biface: 2}
+  consomme: {res.bois_sec: 0.5}
+  produit: {obj.necessaire_feu: 1}
+
+- id: proc.allumer_feu
+  nom: Allumer un feu par friction
+  met_en_oeuvre: tech.allumage_friction
+  duree: 240
+  utilise: [obj.necessaire_feu]
+  degrade: {obj.necessaire_feu: 10}
+  consomme: {res.herbes_seches: 0.1, res.bois_sec: 1}
+  produit: {ins.foyer: 1}
+
+- id: proc.alimenter_feu
+  nom: Remettre du bois dans le feu
+  met_en_oeuvre: tech.entretien_feu
+  duree: 10
+  requiert: [ins.foyer]
+  consomme: {res.bois_sec: 1}
+  entretient: [ins.foyer]
+
+- id: proc.se_rechauffer
+  nom: Se réchauffer près du feu
+  met_en_oeuvre: tech.gestes_vitaux
+  duree: 300
+  requiert: [ins.foyer]
+  satisfait: {bes.chaleur: 20, bes.securite: 5}
+
+# --- Abri et repos ----------------------------------------------------------------
+- id: proc.dormir_dehors
+  nom: Dormir à la belle étoile
+  description: Repose, mais on a froid et on se sent vulnérable. On en tire une leçon.
+  met_en_oeuvre: tech.gestes_vitaux
+  duree: 28800
+  satisfait: {bes.repos: 40, bes.sante: 5}
+  aggrave: {bes.chaleur: 20, bes.securite: 10}
+  debloque: [con.protection_vent]
+
+- id: proc.construire_abri
+  nom: Construire un abri en appentis
+  met_en_oeuvre: tech.abri_appentis
+  duree: 3600
+  consomme: {res.branches_vertes: 15, res.feuillage: 8}
+  produit: {ins.abri_branchages: 1}
+
+- id: proc.faire_couche
+  nom: Préparer une couche de feuillage
+  met_en_oeuvre: tech.abri_appentis
+  duree: 300
+  consomme: {res.feuillage: 4}
+  produit: {ins.couche_feuillage: 1}
+
+- id: proc.dormir_abri
+  nom: Dormir dans l'abri
+  met_en_oeuvre: tech.gestes_vitaux
+  duree: 28800
+  requiert: [ins.abri_branchages]
+  utilise:
+    - {id: ins.couche_feuillage, optionnel: true}
+  satisfait: {bes.repos: 70, bes.securite: 30, bes.chaleur: 10, bes.sante: 15}

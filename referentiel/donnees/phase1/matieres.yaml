@@ -1,0 +1,121 @@
+# Ressources (lots), objets (individualisés) et installations — phase 1 (PROPOSÉ)
+# Propriétés : « cachee: true » = connue du moteur, à découvrir par le personnage.
+
+# --- Ressources ---------------------------------------------------------------
+- id: res.eau
+  nom: Eau
+  unite: l
+  proprietes:
+    alimentaire: {hydratation: 100}
+    biologique: {contamination: {valeur: 0.05, cachee: true}}
+    degradation: {transportable: {valeur_txt: "non sans récipient"}}
+
+- id: res.baies
+  nom: Baies sauvages
+  unite: kg
+  proprietes:
+    alimentaire: {energie: {valeur: 2400, unite: kjkg}, comestible: {valeur: 1}}
+    degradation: {peremption_jours: 3}
+
+- id: res.champignons
+  nom: Champignons
+  unite: kg
+  proprietes:
+    alimentaire: {energie: {valeur: 1100, unite: kjkg}}
+    biologique: {toxicite: {valeur: 0.4, cachee: true}}
+    degradation: {peremption_jours: 2}
+
+- id: res.bois_sec
+  nom: Bois sec
+  description: Branches mortes, combustible.
+  unite: kg
+  proprietes:
+    thermique: {pouvoir_calorifique: {valeur: 15000, unite: kjkg}, inflammabilite: {valeur: 0.6}}
+    physique: {humidite: {valeur: 0.15, cachee: true}}
+
+- id: res.branches_vertes
+  nom: Branches vertes
+  description: Souples et solides, pour construire ; brûlent mal.
+  unite: kg
+  proprietes:
+    mecanique: {souplesse: {valeur: 0.7}}
+    thermique: {inflammabilite: {valeur: 0.1}}
+
+- id: res.feuillage
+  nom: Feuillage
+  description: Couverture d'abri, couchage.
+  unite: kg
+  proprietes:
+    thermique: {isolation: {valeur: 0.5}}
+
+- id: res.herbes_seches
+  nom: Herbes sèches
+  description: Amadou pour démarrer un feu.
+  unite: kg
+  proprietes:
+    thermique: {inflammabilite: {valeur: 0.95}}
+
+- id: res.galet
+  nom: Galet
+  description: Pierre dure et ronde, sert de percuteur.
+  unite: u
+  proprietes:
+    mecanique: {durete: {valeur: 0.8}}
+
+- id: res.silex_brut
+  nom: Rognon de silex
+  unite: kg
+  proprietes:
+    mecanique: {durete: {valeur: 0.9}, fracture_conchoidale: {valeur: 1, cachee: true}}
+
+- id: res.eclats_silex
+  nom: Éclats de silex
+  description: Déchets et éclats bruts de taille.
+  unite: u
+
+# --- Objets -------------------------------------------------------------------
+- id: obj.eclat_tranchant
+  nom: Éclat tranchant
+  description: Couteau rudimentaire, s'émousse vite.
+  unite: u
+  proprietes:
+    mecanique: {tranchant: {valeur: 0.7}}
+    degradation: {usure_par_usage: {valeur: 8, unite: pct}}
+
+- id: obj.biface
+  nom: Biface
+  description: Outil polyvalent façonné sur les deux faces (couper, racler, fendre).
+  unite: u
+  proprietes:
+    mecanique: {tranchant: {valeur: 0.8}, robustesse: {valeur: 0.8}}
+    degradation: {usure_par_usage: {valeur: 2, unite: pct}}
+
+- id: obj.necessaire_feu
+  nom: Nécessaire à feu par friction
+  description: Foret en bois et planchette creusée.
+  unite: u
+  proprietes:
+    degradation: {usure_par_usage: {valeur: 10, unite: pct}}
+
+# --- Installations ------------------------------------------------------------
+- id: ins.foyer
+  nom: Foyer
+  description: Feu entretenu ; chauffe, éclaire, éloigne les animaux. S'éteint sans combustible.
+  attributs: {consommation_kg_par_heure: 1.5, capacite_kg: 6}
+  proprietes:
+    thermique: {puissance: {valeur: 15}}
+
+- id: ins.abri_branchages
+  nom: Abri de branchages
+  description: Appentis couvert de feuillage.
+  attributs: {places: 1}
+  proprietes:
+    thermique: {isolation: {valeur: 0.5}}
+    degradation: {usure_par_jour: {valeur: 3, unite: pct}}
+
+- id: ins.couche_feuillage
+  nom: Couche de feuillage
+  description: Lit sommaire qui isole du sol.
+  proprietes:
+    thermique: {isolation: {valeur: 0.3}}
+    degradation: {usure_par_jour: {valeur: 5, unite: pct}}

@@ -1,0 +1,32 @@
+# Besoins vitaux — phase 1 (PROPOSÉ)
+# attributs.baisse : perte en points par heure de jeu quand rien n'est fait (valeurs à calibrer)
+
+- id: bes.soif
+  nom: Soif
+  description: Besoin de boire. Devient critique plus vite que la faim.
+  attributs: {baisse_par_heure: 6, critique_sous: 15}
+
+- id: bes.faim
+  nom: Faim
+  description: Besoin de s'alimenter.
+  attributs: {baisse_par_heure: 3, critique_sous: 10}
+
+- id: bes.repos
+  nom: Repos
+  description: Fatigue accumulée par l'activité ; se récupère en dormant.
+  attributs: {baisse_par_heure: 2.5, critique_sous: 10}
+
+- id: bes.chaleur
+  nom: Chaleur
+  description: Température corporelle ; baisse la nuit, par temps froid ou humide.
+  attributs: {baisse_par_heure: 4, critique_sous: 20, depend_de: [meteo, heure, abri]}
+
+- id: bes.securite
+  nom: Sécurité
+  description: Protection contre les intempéries et les animaux ; influe sur la qualité du sommeil.
+  attributs: {baisse_par_heure: 1, critique_sous: 20}
+
+- id: bes.sante
+  nom: Santé
+  description: État physique général ; atteint par les blessures, les intoxications, le froid prolongé.
+  attributs: {baisse_par_heure: 0, critique_sous: 25}

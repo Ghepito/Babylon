@@ -1,0 +1,117 @@
+# Compétences (hiérarchisées), techniques et connaissances — phase 1 (PROPOSÉ)
+
+# --- Compétences : aptitude générale > spécialisation -------------------------
+- id: comp.survie
+  nom: Survie
+  description: Aptitude générale à subvenir à ses besoins dans la nature.
+
+- id: comp.cueillette
+  nom: Cueillette
+  specialise: comp.survie
+
+- id: comp.experimentation
+  nom: Observation et expérimentation
+  specialise: comp.survie
+
+- id: comp.travail_pierre
+  nom: Travail de la pierre
+  description: Aptitude générale.
+
+- id: comp.taille
+  nom: Taille par percussion
+  specialise: comp.travail_pierre
+
+- id: comp.maitrise_feu
+  nom: Maîtrise du feu
+  description: Aptitude générale.
+
+- id: comp.allumage
+  nom: Allumage
+  specialise: comp.maitrise_feu
+
+- id: comp.entretien_feu
+  nom: Entretien du feu
+  specialise: comp.maitrise_feu
+
+- id: comp.construction
+  nom: Construction
+  description: Aptitude générale.
+
+- id: comp.abris
+  nom: Abris sommaires
+  specialise: comp.construction
+
+- id: comp.travail_bois
+  nom: Travail du bois
+  description: Aptitude générale.
+
+# --- Techniques (méthodes connues ou à découvrir) -----------------------------
+- id: tech.gestes_vitaux
+  nom: Gestes vitaux
+  description: Boire, manger, dormir — innés.
+  releve_de: comp.survie
+
+- id: tech.ramassage
+  nom: Ramassage
+  description: Prélever à la main ce que la nature offre.
+  releve_de: comp.cueillette
+
+- id: tech.experimentation
+  nom: Expérimentation
+  description: Essayer, observer, recommencer. Source des premières découvertes.
+  releve_de: comp.experimentation
+
+- id: tech.taille_percussion
+  nom: Taille par percussion directe
+  releve_de: comp.taille
+  decouverte: [con.silex_tranchant]
+
+- id: tech.faconnage_bifacial
+  nom: Façonnage bifacial
+  releve_de: comp.taille
+  decouverte: [tech.taille_percussion]
+
+- id: tech.decoupe
+  nom: Découpe à l'outil tranchant
+  releve_de: comp.travail_bois
+  decouverte: [con.silex_tranchant]
+
+- id: tech.allumage_friction
+  nom: Allumage par friction
+  releve_de: comp.allumage
+  decouverte: [con.frottement_chaleur, con.combustion]
+
+- id: tech.entretien_feu
+  nom: Entretien du feu
+  releve_de: comp.entretien_feu
+  decouverte: [con.combustion]
+
+- id: tech.abri_appentis
+  nom: Abri en appentis
+  releve_de: comp.abris
+  decouverte: [con.protection_vent]
+
+# --- Connaissances (acquises par l'expérience) --------------------------------
+- id: con.plantes_comestibles
+  nom: Baies comestibles
+  description: Savoir reconnaître les baies que l'on peut manger sans danger.
+
+- id: con.champignons_toxiques
+  nom: Champignons dangereux
+  description: Certains champignons rendent malade. Appris à ses dépens ou par l'observation.
+
+- id: con.silex_tranchant
+  nom: Le silex cassé coupe
+  description: Un silex frappé produit des arêtes tranchantes.
+
+- id: con.frottement_chaleur
+  nom: Le frottement chauffe
+  description: Frotter vigoureusement deux bois produit de la chaleur, puis de la fumée.
+
+- id: con.combustion
+  nom: Le feu se nourrit
+  description: Le feu prend sur les herbes sèches et se maintient avec du bois sec.
+
+- id: con.protection_vent
+  nom: S'abriter du vent
+  description: Un écran de branches et de feuilles protège du vent et de la pluie.

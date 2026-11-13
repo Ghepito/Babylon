@@ -34,4 +34,7 @@ Source : [`conception-ia-externe.md`](conception-ia-externe.md) (synthèse du 13
 - Échelle de maîtrise 0-100 avec six paliers : novice, initié, apprenti, compétent, confirmé, expert (seuils à définir).
 - Stockage : SQLite pour la conception, JSON pour le jeu, Excel pour la consultation.
 - Vocabulaire des relations : REQUIERT (ET/OU/NON), CONSOMME, PRODUIT, TRANSFORME, UTILISE, ALIMENTE, ENTRETIENT, DEBLOQUE, AMELIORE, TRANSMET, DEGRADE, SATISFAIT, REDUIT_RISQUE.
+- Saisie du référentiel en fichiers YAML (lisibles, commentables), construits en SQLite puis exportés en JSON/Excel par `tools/referentiel.py`.
+- Contenu de la phase 1 : 81 éléments (6 besoins, 8 sources, 10 ressources, 3 objets, 3 installations, 11 compétences, 9 techniques, 6 connaissances, 25 procédés) — voir `referentiel/donnees/phase1/`.
+- Valeurs numériques (durées, quantités, baisses des besoins) : provisoires, à calibrer en jouant.
 - Découpage en paliers : voir [`feuille-de-route.md`](feuille-de-route.md).

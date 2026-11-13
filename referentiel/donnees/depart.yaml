@@ -1,0 +1,19 @@
+# Scénarios de départ — ce que le personnage sait et ce que le monde contient au début.
+# Sert à l'analyse d'accessibilité : tout élément du référentiel doit pouvoir être atteint depuis un scénario.
+
+solitaire:
+  description: Un personnage seul, sans outil, au bord d'un lac en été.
+  connait:
+    - tech.gestes_vitaux
+    - tech.ramassage
+    - tech.experimentation
+    - con.plantes_comestibles
+  monde:
+    - src.lac
+    - src.buisson_baies
+    - src.sous_bois
+    - src.bois_mort
+    - src.arbre
+    - src.prairie
+    - src.riviere_galets
+    - src.affleurement_silex

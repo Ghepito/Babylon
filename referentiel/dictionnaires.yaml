@@ -1,0 +1,95 @@
+# Dictionnaires du référentiel — PROPOSÉ (palier 1)
+
+types_element:
+  - {code: besoin,       prefixe: bes,  libelle: Besoin,       description: "Besoin vital ou de confort d'un personnage (faim, soif...)"}
+  - {code: source,       prefixe: src,  libelle: Source naturelle, description: "Élément du monde où l'on prélève des ressources (lac, buisson, affleurement...)"}
+  - {code: ressource,    prefixe: res,  libelle: Ressource,    description: "Matière comptée en lots (eau, bois sec, baies...)"}
+  - {code: objet,        prefixe: obj,  libelle: Objet,        description: "Objet individualisé, s'use (outil, nécessaire à feu...)"}
+  - {code: installation, prefixe: ins,  libelle: Installation, description: "Élément construit et fixe (foyer, abri...)"}
+  - {code: competence,   prefixe: comp, libelle: Compétence,   description: "Aptitude évolutive 0-100, hiérarchisée (générale > spécialisation)"}
+  - {code: technique,    prefixe: tech, libelle: Technique,    description: "Méthode connue ou apprise, relève d'une compétence"}
+  - {code: connaissance, prefixe: con,  libelle: Connaissance, description: "Savoir acquis par l'expérience, l'observation ou l'enseignement"}
+  - {code: procede,      prefixe: proc, libelle: Procédé,      description: "Manière d'appliquer une technique avec des ressources, des outils et des conditions ; son exécution est une action"}
+
+types_relation:
+  # prérequis
+  - {code: REQUIERT,     famille: prerequis,      libelle: "requiert",            quantifiee: 0}
+  # transformation
+  - {code: CONSOMME,     famille: transformation, libelle: "consomme",            quantifiee: 1}
+  - {code: PRODUIT,      famille: transformation, libelle: "produit",             quantifiee: 1}
+  # utilisation
+  - {code: UTILISE,      famille: utilisation,    libelle: "utilise (sans consommer)", quantifiee: 0}
+  - {code: ALIMENTE,     famille: utilisation,    libelle: "alimente",            quantifiee: 0}
+  - {code: ENTRETIENT,   famille: utilisation,    libelle: "entretient",          quantifiee: 0}
+  # progression
+  - {code: MET_EN_OEUVRE, famille: progression,   libelle: "met en œuvre",        quantifiee: 0}
+  - {code: DEBLOQUE,     famille: progression,    libelle: "débloque",            quantifiee: 0}
+  # conséquences
+  - {code: SATISFAIT,    famille: consequence,    libelle: "satisfait",           quantifiee: 1}
+  - {code: DEGRADE,      famille: consequence,    libelle: "use / dégrade",       quantifiee: 1}
+  - {code: AGGRAVE,      famille: consequence,    libelle: "aggrave",             quantifiee: 1}
+  # structure
+  - {code: RELEVE_DE,    famille: structure,      libelle: "relève de",           quantifiee: 0}
+  - {code: SPECIALISE,   famille: structure,      libelle: "spécialise",          quantifiee: 0}
+
+# Combinaisons autorisées : RELATION: [[type_source, type_cible], ...]
+relations_autorisees:
+  REQUIERT:
+    - [procede, source]
+    - [procede, connaissance]
+    - [procede, installation]
+    - [technique, connaissance]
+    - [technique, technique]
+    - [technique, ressource]
+    - [technique, objet]
+  CONSOMME:
+    - [procede, ressource]
+    - [procede, objet]
+  PRODUIT:
+    - [procede, ressource]
+    - [procede, objet]
+    - [procede, installation]
+  UTILISE:
+    - [procede, objet]
+    - [procede, installation]
+    - [procede, ressource]
+  ALIMENTE:
+    - [ressource, installation]
+  ENTRETIENT:
+    - [procede, installation]
+  MET_EN_OEUVRE:
+    - [procede, technique]
+  DEBLOQUE:
+    - [procede, connaissance]
+  SATISFAIT:
+    - [procede, besoin]
+  DEGRADE:
+    - [procede, objet]
+    - [procede, installation]
+  AGGRAVE:
+    - [procede, besoin]
+  RELEVE_DE:
+    - [technique, competence]
+  SPECIALISE:
+    - [competence, competence]
+
+unites:
+  - {code: u,    grandeur: nombre,  libelle: unité}
+  - {code: kg,   grandeur: masse,   libelle: kilogramme}
+  - {code: l,    grandeur: volume,  libelle: litre}
+  - {code: s,    grandeur: duree,   libelle: seconde (temps de jeu)}
+  - {code: pts,  grandeur: besoin,  libelle: points de besoin (0-100)}
+  - {code: pct,  grandeur: usure,   libelle: pourcentage}
+  - {code: kj,   grandeur: energie, libelle: kilojoule}
+  - {code: kjkg, grandeur: energie_massique, libelle: kilojoule par kilogramme}
+  - {code: c,    grandeur: temperature, libelle: degré Celsius}
+
+modules_propriete:
+  - {code: physique,    libelle: Physique}
+  - {code: thermique,   libelle: Thermique}
+  - {code: mecanique,   libelle: Mécanique}
+  - {code: alimentaire, libelle: Alimentaire}
+  - {code: biologique,  libelle: Biologique}
+  - {code: chimique,    libelle: Chimique}
+  - {code: energetique, libelle: Énergétique}
+  - {code: degradation, libelle: Dégradation}

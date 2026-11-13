@@ -1,0 +1,2233 @@
+{
+ "version_schema": "1.0-propose",
+ "genere_le": "2026-11-13T16:47:11+00:00",
+ "types": [
+  {
+   "code": "besoin",
+   "prefixe": "bes",
+   "libelle": "Besoin",
+   "description": "Besoin vital ou de confort d'un personnage (faim, soif...)"
+  },
+  {
+   "code": "source",
+   "prefixe": "src",
+   "libelle": "Source naturelle",
+   "description": "Élément du monde où l'on prélève des ressources (lac, buisson, affleurement...)"
+  },
+  {
+   "code": "ressource",
+   "prefixe": "res",
+   "libelle": "Ressource",
+   "description": "Matière comptée en lots (eau, bois sec, baies...)"
+  },
+  {
+   "code": "objet",
+   "prefixe": "obj",
+   "libelle": "Objet",
+   "description": "Objet individualisé, s'use (outil, nécessaire à feu...)"
+  },
+  {
+   "code": "installation",
+   "prefixe": "ins",
+   "libelle": "Installation",
+   "description": "Élément construit et fixe (foyer, abri...)"
+  },
+  {
+   "code": "competence",
+   "prefixe": "comp",
+   "libelle": "Compétence",
+   "description": "Aptitude évolutive 0-100, hiérarchisée (générale > spécialisation)"
+  },
+  {
+   "code": "technique",
+   "prefixe": "tech",
+   "libelle": "Technique",
+   "description": "Méthode connue ou apprise, relève d'une compétence"
+  },
+  {
+   "code": "connaissance",
+   "prefixe": "con",
+   "libelle": "Connaissance",
+   "description": "Savoir acquis par l'expérience, l'observation ou l'enseignement"
+  },
+  {
+   "code": "procede",
+   "prefixe": "proc",
+   "libelle": "Procédé",
+   "description": "Manière d'appliquer une technique avec des ressources, des outils et des conditions ; son exécution est une action"
+  }
+ ],
+ "types_relation": [
+  {
+   "code": "REQUIERT",
+   "famille": "prerequis",
+   "libelle": "requiert",
+   "quantifiee": 0
+  },
+  {
+   "code": "CONSOMME",
+   "famille": "transformation",
+   "libelle": "consomme",
+   "quantifiee": 1
+  },
+  {
+   "code": "PRODUIT",
+   "famille": "transformation",
+   "libelle": "produit",
+   "quantifiee": 1
+  },
+  {
+   "code": "UTILISE",
+   "famille": "utilisation",
+   "libelle": "utilise (sans consommer)",
+   "quantifiee": 0
+  },
+  {
+   "code": "ALIMENTE",
+   "famille": "utilisation",
+   "libelle": "alimente",
+   "quantifiee": 0
+  },
+  {
+   "code": "ENTRETIENT",
+   "famille": "utilisation",
+   "libelle": "entretient",
+   "quantifiee": 0
+  },
+  {
+   "code": "MET_EN_OEUVRE",
+   "famille": "progression",
+   "libelle": "met en œuvre",
+   "quantifiee": 0
+  },
+  {
+   "code": "DEBLOQUE",
+   "famille": "progression",
+   "libelle": "débloque",
+   "quantifiee": 0
+  },
+  {
+   "code": "SATISFAIT",
+   "famille": "consequence",
+   "libelle": "satisfait",
+   "quantifiee": 1
+  },
+  {
+   "code": "DEGRADE",
+   "famille": "consequence",
+   "libelle": "use / dégrade",
+   "quantifiee": 1
+  },
+  {
+   "code": "AGGRAVE",
+   "famille": "consequence",
+   "libelle": "aggrave",
+   "quantifiee": 1
+  },
+  {
+   "code": "RELEVE_DE",
+   "famille": "structure",
+   "libelle": "relève de",
+   "quantifiee": 0
+  },
+  {
+   "code": "SPECIALISE",
+   "famille": "structure",
+   "libelle": "spécialise",
+   "quantifiee": 0
+  }
+ ],
+ "elements": [
+  {
+   "id": "bes.soif",
+   "type": "besoin",
+   "nom": "Soif",
+   "description": "Besoin de boire. Devient critique plus vite que la faim.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "baisse_par_heure": 6,
+    "critique_sous": 15
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "bes.faim",
+   "type": "besoin",
+   "nom": "Faim",
+   "description": "Besoin de s'alimenter.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "baisse_par_heure": 3,
+    "critique_sous": 10
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "bes.repos",
+   "type": "besoin",
+   "nom": "Repos",
+   "description": "Fatigue accumulée par l'activité ; se récupère en dormant.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "baisse_par_heure": 2.5,
+    "critique_sous": 10
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "bes.chaleur",
+   "type": "besoin",
+   "nom": "Chaleur",
+   "description": "Température corporelle ; baisse la nuit, par temps froid ou humide.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "baisse_par_heure": 4,
+    "critique_sous": 20,
+    "depend_de": [
+     "meteo",
+     "heure",
+     "abri"
+    ]
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "bes.securite",
+   "type": "besoin",
+   "nom": "Sécurité",
+   "description": "Protection contre les intempéries et les animaux ; influe sur la qualité du sommeil.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "baisse_par_heure": 1,
+    "critique_sous": 20
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "bes.sante",
+   "type": "besoin",
+   "nom": "Santé",
+   "description": "État physique général ; atteint par les blessures, les intoxications, le froid prolongé.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "baisse_par_heure": 0,
+    "critique_sous": 25
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "res.eau",
+   "type": "ressource",
+   "nom": "Eau",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": "l",
+   "attributs": {},
+   "proprietes": {
+    "alimentaire": {
+     "hydratation": {
+      "valeur": 100.0
+     }
+    },
+    "biologique": {
+     "contamination": {
+      "valeur": 0.05,
+      "cachee": true
+     }
+    },
+    "degradation": {
+     "transportable": {
+      "texte": "non sans récipient"
+     }
+    }
+   }
+  },
+  {
+   "id": "res.baies",
+   "type": "ressource",
+   "nom": "Baies sauvages",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": "kg",
+   "attributs": {},
+   "proprietes": {
+    "alimentaire": {
+     "energie": {
+      "valeur": 2400.0,
+      "unite": "kjkg"
+     },
+     "comestible": {
+      "valeur": 1.0
+     }
+    },
+    "degradation": {
+     "peremption_jours": {
+      "valeur": 3.0
+     }
+    }
+   }
+  },
+  {
+   "id": "res.champignons",
+   "type": "ressource",
+   "nom": "Champignons",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": "kg",
+   "attributs": {},
+   "proprietes": {
+    "alimentaire": {
+     "energie": {
+      "valeur": 1100.0,
+      "unite": "kjkg"
+     }
+    },
+    "biologique": {
+     "toxicite": {
+      "valeur": 0.4,
+      "cachee": true
+     }
+    },
+    "degradation": {
+     "peremption_jours": {
+      "valeur": 2.0
+     }
+    }
+   }
+  },
+  {
+   "id": "res.bois_sec",
+   "type": "ressource",
+   "nom": "Bois sec",
+   "description": "Branches mortes, combustible.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": "kg",
+   "attributs": {},
+   "proprietes": {
+    "thermique": {
+     "pouvoir_calorifique": {
+      "valeur": 15000.0,
+      "unite": "kjkg"
+     },
+     "inflammabilite": {
+      "valeur": 0.6
+     }
+    },
+    "physique": {
+     "humidite": {
+      "valeur": 0.15,
+      "cachee": true
+     }
+    }
+   }
+  },
+  {
+   "id": "res.branches_vertes",
+   "type": "ressource",
+   "nom": "Branches vertes",
+   "description": "Souples et solides, pour construire ; brûlent mal.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": "kg",
+   "attributs": {},
+   "proprietes": {
+    "mecanique": {
+     "souplesse": {
+      "valeur": 0.7
+     }
+    },
+    "thermique": {
+     "inflammabilite": {
+      "valeur": 0.1
+     }
+    }
+   }
+  },
+  {
+   "id": "res.feuillage",
+   "type": "ressource",
+   "nom": "Feuillage",
+   "description": "Couverture d'abri, couchage.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": "kg",
+   "attributs": {},
+   "proprietes": {
+    "thermique": {
+     "isolation": {
+      "valeur": 0.5
+     }
+    }
+   }
+  },
+  {
+   "id": "res.herbes_seches",
+   "type": "ressource",
+   "nom": "Herbes sèches",
+   "description": "Amadou pour démarrer un feu.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": "kg",
+   "attributs": {},
+   "proprietes": {
+    "thermique": {
+     "inflammabilite": {
+      "valeur": 0.95
+     }
+    }
+   }
+  },
+  {
+   "id": "res.galet",
+   "type": "ressource",
+   "nom": "Galet",
+   "description": "Pierre dure et ronde, sert de percuteur.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": "u",
+   "attributs": {},
+   "proprietes": {
+    "mecanique": {
+     "durete": {
+      "valeur": 0.8
+     }
+    }
+   }
+  },
+  {
+   "id": "res.silex_brut",
+   "type": "ressource",
+   "nom": "Rognon de silex",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": "kg",
+   "attributs": {},
+   "proprietes": {
+    "mecanique": {
+     "durete": {
+      "valeur": 0.9
+     },
+     "fracture_conchoidale": {
+      "valeur": 1.0,
+      "cachee": true
+     }
+    }
+   }
+  },
+  {
+   "id": "res.eclats_silex",
+   "type": "ressource",
+   "nom": "Éclats de silex",
+   "description": "Déchets et éclats bruts de taille.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": "u",
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "obj.eclat_tranchant",
+   "type": "objet",
+   "nom": "Éclat tranchant",
+   "description": "Couteau rudimentaire, s'émousse vite.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": "u",
+   "attributs": {},
+   "proprietes": {
+    "mecanique": {
+     "tranchant": {
+      "valeur": 0.7
+     }
+    },
+    "degradation": {
+     "usure_par_usage": {
+      "valeur": 8.0,
+      "unite": "pct"
+     }
+    }
+   }
+  },
+  {
+   "id": "obj.biface",
+   "type": "objet",
+   "nom": "Biface",
+   "description": "Outil polyvalent façonné sur les deux faces (couper, racler, fendre).",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": "u",
+   "attributs": {},
+   "proprietes": {
+    "mecanique": {
+     "tranchant": {
+      "valeur": 0.8
+     },
+     "robustesse": {
+      "valeur": 0.8
+     }
+    },
+    "degradation": {
+     "usure_par_usage": {
+      "valeur": 2.0,
+      "unite": "pct"
+     }
+    }
+   }
+  },
+  {
+   "id": "obj.necessaire_feu",
+   "type": "objet",
+   "nom": "Nécessaire à feu par friction",
+   "description": "Foret en bois et planchette creusée.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": "u",
+   "attributs": {},
+   "proprietes": {
+    "degradation": {
+     "usure_par_usage": {
+      "valeur": 10.0,
+      "unite": "pct"
+     }
+    }
+   }
+  },
+  {
+   "id": "ins.foyer",
+   "type": "installation",
+   "nom": "Foyer",
+   "description": "Feu entretenu ; chauffe, éclaire, éloigne les animaux. S'éteint sans combustible.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "consommation_kg_par_heure": 1.5,
+    "capacite_kg": 6
+   },
+   "proprietes": {
+    "thermique": {
+     "puissance": {
+      "valeur": 15.0
+     }
+    }
+   }
+  },
+  {
+   "id": "ins.abri_branchages",
+   "type": "installation",
+   "nom": "Abri de branchages",
+   "description": "Appentis couvert de feuillage.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "places": 1
+   },
+   "proprietes": {
+    "thermique": {
+     "isolation": {
+      "valeur": 0.5
+     }
+    },
+    "degradation": {
+     "usure_par_jour": {
+      "valeur": 3.0,
+      "unite": "pct"
+     }
+    }
+   }
+  },
+  {
+   "id": "ins.couche_feuillage",
+   "type": "installation",
+   "nom": "Couche de feuillage",
+   "description": "Lit sommaire qui isole du sol.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {
+    "thermique": {
+     "isolation": {
+      "valeur": 0.3
+     }
+    },
+    "degradation": {
+     "usure_par_jour": {
+      "valeur": 5.0,
+      "unite": "pct"
+     }
+    }
+   }
+  },
+  {
+   "id": "src.lac",
+   "type": "source",
+   "nom": "Lac d'eau douce",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "stock": "illimite"
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "src.buisson_baies",
+   "type": "source",
+   "nom": "Buisson de baies",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "stock": 6,
+    "unite_stock": "kg",
+    "repousse_par_jour": 0.5,
+    "saison": [
+     "ete",
+     "automne"
+    ]
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "src.sous_bois",
+   "type": "source",
+   "nom": "Sous-bois humide",
+   "description": "Sol forestier où poussent des champignons.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "stock": 3,
+    "unite_stock": "kg",
+    "repousse_par_jour": 0.3,
+    "saison": [
+     "automne"
+    ]
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "src.bois_mort",
+   "type": "source",
+   "nom": "Bois mort au sol",
+   "description": "Branches tombées, sèches si le temps l'est.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "stock": 20,
+    "unite_stock": "kg",
+    "repousse_par_jour": 1
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "src.arbre",
+   "type": "source",
+   "nom": "Arbre vivant",
+   "description": "Fournit des branches vertes et du feuillage.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "stock": 40,
+    "unite_stock": "kg",
+    "repousse_par_jour": 0.5
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "src.prairie",
+   "type": "source",
+   "nom": "Prairie sèche",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "stock": 10,
+    "unite_stock": "kg",
+    "repousse_par_jour": 1,
+    "saison": [
+     "ete",
+     "automne"
+    ]
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "src.riviere_galets",
+   "type": "source",
+   "nom": "Lit de rivière à galets",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "stock": "illimite"
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "src.affleurement_silex",
+   "type": "source",
+   "nom": "Affleurement de silex",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "stock": 200,
+    "unite_stock": "kg"
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.puiser_eau",
+   "type": "procede",
+   "nom": "Puiser de l'eau dans ses mains",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 5
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.boire",
+   "type": "procede",
+   "nom": "Boire",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 10
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.cueillir_baies",
+   "type": "procede",
+   "nom": "Cueillir des baies",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 60
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.manger_baies",
+   "type": "procede",
+   "nom": "Manger des baies",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 30
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.ramasser_champignons",
+   "type": "procede",
+   "nom": "Ramasser des champignons",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 60
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.manger_champignons",
+   "type": "procede",
+   "nom": "Goûter des champignons",
+   "description": "Nourrit un peu… mais certains rendent malade. On l'apprend en essayant.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 30
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.ramasser_bois_sec",
+   "type": "procede",
+   "nom": "Ramasser du bois mort",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 90
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.ramasser_herbes",
+   "type": "procede",
+   "nom": "Ramasser des herbes sèches",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 40
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.cueillir_feuillage",
+   "type": "procede",
+   "nom": "Arracher du feuillage",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 60
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.ramasser_galet",
+   "type": "procede",
+   "nom": "Choisir un galet",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 20
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.ramasser_silex",
+   "type": "procede",
+   "nom": "Ramasser des rognons de silex",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 60
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.couper_branches",
+   "type": "procede",
+   "nom": "Couper des branches vertes",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 120
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.casser_silex",
+   "type": "procede",
+   "nom": "Frapper un silex avec un galet",
+   "description": "Expérimentation. Révèle que le silex cassé coupe.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 120
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.tailler_eclats",
+   "type": "procede",
+   "nom": "Tailler des éclats tranchants",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 180
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.faconner_biface",
+   "type": "procede",
+   "nom": "Façonner un biface",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 600,
+    "condition": {
+     "competence": "comp.taille",
+     "min": 25
+    }
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.frotter_bois",
+   "type": "procede",
+   "nom": "Frotter deux bois l'un contre l'autre",
+   "description": "Expérimentation. Le bois chauffe, fume…",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 120
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.essai_braise",
+   "type": "procede",
+   "nom": "Faire tomber la braise dans des herbes sèches",
+   "description": "Expérimentation. Les herbes s'enflamment et le bois prend.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 180
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.fabriquer_necessaire_feu",
+   "type": "procede",
+   "nom": "Fabriquer un foret et une planchette",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 300
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.allumer_feu",
+   "type": "procede",
+   "nom": "Allumer un feu par friction",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 240
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.alimenter_feu",
+   "type": "procede",
+   "nom": "Remettre du bois dans le feu",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 10
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.se_rechauffer",
+   "type": "procede",
+   "nom": "Se réchauffer près du feu",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 300
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.dormir_dehors",
+   "type": "procede",
+   "nom": "Dormir à la belle étoile",
+   "description": "Repose, mais on a froid et on se sent vulnérable. On en tire une leçon.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 28800
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.construire_abri",
+   "type": "procede",
+   "nom": "Construire un abri en appentis",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 3600
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.faire_couche",
+   "type": "procede",
+   "nom": "Préparer une couche de feuillage",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 300
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.dormir_abri",
+   "type": "procede",
+   "nom": "Dormir dans l'abri",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 28800
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "comp.survie",
+   "type": "competence",
+   "nom": "Survie",
+   "description": "Aptitude générale à subvenir à ses besoins dans la nature.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "comp.cueillette",
+   "type": "competence",
+   "nom": "Cueillette",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "comp.experimentation",
+   "type": "competence",
+   "nom": "Observation et expérimentation",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "comp.travail_pierre",
+   "type": "competence",
+   "nom": "Travail de la pierre",
+   "description": "Aptitude générale.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "comp.taille",
+   "type": "competence",
+   "nom": "Taille par percussion",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "comp.maitrise_feu",
+   "type": "competence",
+   "nom": "Maîtrise du feu",
+   "description": "Aptitude générale.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "comp.allumage",
+   "type": "competence",
+   "nom": "Allumage",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "comp.entretien_feu",
+   "type": "competence",
+   "nom": "Entretien du feu",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "comp.construction",
+   "type": "competence",
+   "nom": "Construction",
+   "description": "Aptitude générale.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "comp.abris",
+   "type": "competence",
+   "nom": "Abris sommaires",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "comp.travail_bois",
+   "type": "competence",
+   "nom": "Travail du bois",
+   "description": "Aptitude générale.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "tech.gestes_vitaux",
+   "type": "technique",
+   "nom": "Gestes vitaux",
+   "description": "Boire, manger, dormir — innés.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "tech.ramassage",
+   "type": "technique",
+   "nom": "Ramassage",
+   "description": "Prélever à la main ce que la nature offre.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "tech.experimentation",
+   "type": "technique",
+   "nom": "Expérimentation",
+   "description": "Essayer, observer, recommencer. Source des premières découvertes.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "tech.taille_percussion",
+   "type": "technique",
+   "nom": "Taille par percussion directe",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "tech.faconnage_bifacial",
+   "type": "technique",
+   "nom": "Façonnage bifacial",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "tech.decoupe",
+   "type": "technique",
+   "nom": "Découpe à l'outil tranchant",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "tech.allumage_friction",
+   "type": "technique",
+   "nom": "Allumage par friction",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "tech.entretien_feu",
+   "type": "technique",
+   "nom": "Entretien du feu",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "tech.abri_appentis",
+   "type": "technique",
+   "nom": "Abri en appentis",
+   "description": null,
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "con.plantes_comestibles",
+   "type": "connaissance",
+   "nom": "Baies comestibles",
+   "description": "Savoir reconnaître les baies que l'on peut manger sans danger.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "con.champignons_toxiques",
+   "type": "connaissance",
+   "nom": "Champignons dangereux",
+   "description": "Certains champignons rendent malade. Appris à ses dépens ou par l'observation.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "con.silex_tranchant",
+   "type": "connaissance",
+   "nom": "Le silex cassé coupe",
+   "description": "Un silex frappé produit des arêtes tranchantes.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "con.frottement_chaleur",
+   "type": "connaissance",
+   "nom": "Le frottement chauffe",
+   "description": "Frotter vigoureusement deux bois produit de la chaleur, puis de la fumée.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "con.combustion",
+   "type": "connaissance",
+   "nom": "Le feu se nourrit",
+   "description": "Le feu prend sur les herbes sèches et se maintient avec du bois sec.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  },
+  {
+   "id": "con.protection_vent",
+   "type": "connaissance",
+   "nom": "S'abriter du vent",
+   "description": "Un écran de branches et de feuilles protège du vent et de la pluie.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {},
+   "proprietes": {}
+  }
+ ],
+ "relations": [
+  {
+   "id": 1,
+   "type": "REQUIERT",
+   "source": "proc.puiser_eau",
+   "cible": "src.lac"
+  },
+  {
+   "id": 2,
+   "type": "PRODUIT",
+   "source": "proc.puiser_eau",
+   "cible": "res.eau",
+   "quantite": 0.5
+  },
+  {
+   "id": 3,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.puiser_eau",
+   "cible": "tech.ramassage"
+  },
+  {
+   "id": 4,
+   "type": "CONSOMME",
+   "source": "proc.boire",
+   "cible": "res.eau",
+   "quantite": 0.5
+  },
+  {
+   "id": 5,
+   "type": "SATISFAIT",
+   "source": "proc.boire",
+   "cible": "bes.soif",
+   "quantite": 25.0
+  },
+  {
+   "id": 6,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.boire",
+   "cible": "tech.gestes_vitaux"
+  },
+  {
+   "id": 7,
+   "type": "REQUIERT",
+   "source": "proc.cueillir_baies",
+   "cible": "src.buisson_baies"
+  },
+  {
+   "id": 8,
+   "type": "REQUIERT",
+   "source": "proc.cueillir_baies",
+   "cible": "con.plantes_comestibles"
+  },
+  {
+   "id": 9,
+   "type": "PRODUIT",
+   "source": "proc.cueillir_baies",
+   "cible": "res.baies",
+   "quantite": 0.2
+  },
+  {
+   "id": 10,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.cueillir_baies",
+   "cible": "tech.ramassage"
+  },
+  {
+   "id": 11,
+   "type": "CONSOMME",
+   "source": "proc.manger_baies",
+   "cible": "res.baies",
+   "quantite": 0.2
+  },
+  {
+   "id": 12,
+   "type": "SATISFAIT",
+   "source": "proc.manger_baies",
+   "cible": "bes.faim",
+   "quantite": 10.0
+  },
+  {
+   "id": 13,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.manger_baies",
+   "cible": "tech.gestes_vitaux"
+  },
+  {
+   "id": 14,
+   "type": "REQUIERT",
+   "source": "proc.ramasser_champignons",
+   "cible": "src.sous_bois"
+  },
+  {
+   "id": 15,
+   "type": "PRODUIT",
+   "source": "proc.ramasser_champignons",
+   "cible": "res.champignons",
+   "quantite": 0.2
+  },
+  {
+   "id": 16,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.ramasser_champignons",
+   "cible": "tech.ramassage"
+  },
+  {
+   "id": 17,
+   "type": "DEBLOQUE",
+   "source": "proc.manger_champignons",
+   "cible": "con.champignons_toxiques"
+  },
+  {
+   "id": 18,
+   "type": "CONSOMME",
+   "source": "proc.manger_champignons",
+   "cible": "res.champignons",
+   "quantite": 0.2
+  },
+  {
+   "id": 19,
+   "type": "SATISFAIT",
+   "source": "proc.manger_champignons",
+   "cible": "bes.faim",
+   "quantite": 5.0
+  },
+  {
+   "id": 20,
+   "type": "AGGRAVE",
+   "source": "proc.manger_champignons",
+   "cible": "bes.sante",
+   "quantite": 30.0,
+   "parametres": {
+    "probabilite": "propriete:res.champignons/biologique/toxicite"
+   }
+  },
+  {
+   "id": 21,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.manger_champignons",
+   "cible": "tech.gestes_vitaux"
+  },
+  {
+   "id": 22,
+   "type": "REQUIERT",
+   "source": "proc.ramasser_bois_sec",
+   "cible": "src.bois_mort"
+  },
+  {
+   "id": 23,
+   "type": "PRODUIT",
+   "source": "proc.ramasser_bois_sec",
+   "cible": "res.bois_sec",
+   "quantite": 2.0
+  },
+  {
+   "id": 24,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.ramasser_bois_sec",
+   "cible": "tech.ramassage"
+  },
+  {
+   "id": 25,
+   "type": "REQUIERT",
+   "source": "proc.ramasser_herbes",
+   "cible": "src.prairie"
+  },
+  {
+   "id": 26,
+   "type": "PRODUIT",
+   "source": "proc.ramasser_herbes",
+   "cible": "res.herbes_seches",
+   "quantite": 0.2
+  },
+  {
+   "id": 27,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.ramasser_herbes",
+   "cible": "tech.ramassage"
+  },
+  {
+   "id": 28,
+   "type": "REQUIERT",
+   "source": "proc.cueillir_feuillage",
+   "cible": "src.arbre"
+  },
+  {
+   "id": 29,
+   "type": "PRODUIT",
+   "source": "proc.cueillir_feuillage",
+   "cible": "res.feuillage",
+   "quantite": 1.0
+  },
+  {
+   "id": 30,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.cueillir_feuillage",
+   "cible": "tech.ramassage"
+  },
+  {
+   "id": 31,
+   "type": "REQUIERT",
+   "source": "proc.ramasser_galet",
+   "cible": "src.riviere_galets"
+  },
+  {
+   "id": 32,
+   "type": "PRODUIT",
+   "source": "proc.ramasser_galet",
+   "cible": "res.galet",
+   "quantite": 1.0
+  },
+  {
+   "id": 33,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.ramasser_galet",
+   "cible": "tech.ramassage"
+  },
+  {
+   "id": 34,
+   "type": "REQUIERT",
+   "source": "proc.ramasser_silex",
+   "cible": "src.affleurement_silex"
+  },
+  {
+   "id": 35,
+   "type": "PRODUIT",
+   "source": "proc.ramasser_silex",
+   "cible": "res.silex_brut",
+   "quantite": 2.0
+  },
+  {
+   "id": 36,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.ramasser_silex",
+   "cible": "tech.ramassage"
+  },
+  {
+   "id": 37,
+   "type": "REQUIERT",
+   "source": "proc.couper_branches",
+   "cible": "src.arbre"
+  },
+  {
+   "id": 38,
+   "type": "UTILISE",
+   "source": "proc.couper_branches",
+   "cible": "obj.eclat_tranchant",
+   "parametres": {
+    "groupe": "outil_coupant"
+   }
+  },
+  {
+   "id": 39,
+   "type": "UTILISE",
+   "source": "proc.couper_branches",
+   "cible": "obj.biface",
+   "parametres": {
+    "groupe": "outil_coupant"
+   }
+  },
+  {
+   "id": 40,
+   "type": "PRODUIT",
+   "source": "proc.couper_branches",
+   "cible": "res.branches_vertes",
+   "quantite": 3.0
+  },
+  {
+   "id": 41,
+   "type": "DEGRADE",
+   "source": "proc.couper_branches",
+   "cible": "obj.eclat_tranchant",
+   "quantite": 8.0
+  },
+  {
+   "id": 42,
+   "type": "DEGRADE",
+   "source": "proc.couper_branches",
+   "cible": "obj.biface",
+   "quantite": 2.0
+  },
+  {
+   "id": 43,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.couper_branches",
+   "cible": "tech.decoupe"
+  },
+  {
+   "id": 44,
+   "type": "UTILISE",
+   "source": "proc.casser_silex",
+   "cible": "res.galet"
+  },
+  {
+   "id": 45,
+   "type": "DEBLOQUE",
+   "source": "proc.casser_silex",
+   "cible": "con.silex_tranchant"
+  },
+  {
+   "id": 46,
+   "type": "CONSOMME",
+   "source": "proc.casser_silex",
+   "cible": "res.silex_brut",
+   "quantite": 1.0
+  },
+  {
+   "id": 47,
+   "type": "PRODUIT",
+   "source": "proc.casser_silex",
+   "cible": "res.eclats_silex",
+   "quantite": 4.0
+  },
+  {
+   "id": 48,
+   "type": "PRODUIT",
+   "source": "proc.casser_silex",
+   "cible": "obj.eclat_tranchant",
+   "quantite": 1.0,
+   "parametres": {
+    "probabilite": 0.3
+   }
+  },
+  {
+   "id": 49,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.casser_silex",
+   "cible": "tech.experimentation"
+  },
+  {
+   "id": 50,
+   "type": "UTILISE",
+   "source": "proc.tailler_eclats",
+   "cible": "res.galet"
+  },
+  {
+   "id": 51,
+   "type": "CONSOMME",
+   "source": "proc.tailler_eclats",
+   "cible": "res.silex_brut",
+   "quantite": 1.0
+  },
+  {
+   "id": 52,
+   "type": "PRODUIT",
+   "source": "proc.tailler_eclats",
+   "cible": "obj.eclat_tranchant",
+   "quantite": 3.0
+  },
+  {
+   "id": 53,
+   "type": "PRODUIT",
+   "source": "proc.tailler_eclats",
+   "cible": "res.eclats_silex",
+   "quantite": 5.0
+  },
+  {
+   "id": 54,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.tailler_eclats",
+   "cible": "tech.taille_percussion"
+  },
+  {
+   "id": 55,
+   "type": "UTILISE",
+   "source": "proc.faconner_biface",
+   "cible": "res.galet"
+  },
+  {
+   "id": 56,
+   "type": "CONSOMME",
+   "source": "proc.faconner_biface",
+   "cible": "res.silex_brut",
+   "quantite": 1.5
+  },
+  {
+   "id": 57,
+   "type": "PRODUIT",
+   "source": "proc.faconner_biface",
+   "cible": "obj.biface",
+   "quantite": 1.0
+  },
+  {
+   "id": 58,
+   "type": "PRODUIT",
+   "source": "proc.faconner_biface",
+   "cible": "res.eclats_silex",
+   "quantite": 10.0
+  },
+  {
+   "id": 59,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.faconner_biface",
+   "cible": "tech.faconnage_bifacial"
+  },
+  {
+   "id": 60,
+   "type": "DEBLOQUE",
+   "source": "proc.frotter_bois",
+   "cible": "con.frottement_chaleur"
+  },
+  {
+   "id": 61,
+   "type": "CONSOMME",
+   "source": "proc.frotter_bois",
+   "cible": "res.bois_sec",
+   "quantite": 0.5
+  },
+  {
+   "id": 62,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.frotter_bois",
+   "cible": "tech.experimentation"
+  },
+  {
+   "id": 63,
+   "type": "REQUIERT",
+   "source": "proc.essai_braise",
+   "cible": "con.frottement_chaleur"
+  },
+  {
+   "id": 64,
+   "type": "DEBLOQUE",
+   "source": "proc.essai_braise",
+   "cible": "con.combustion"
+  },
+  {
+   "id": 65,
+   "type": "CONSOMME",
+   "source": "proc.essai_braise",
+   "cible": "res.herbes_seches",
+   "quantite": 0.1
+  },
+  {
+   "id": 66,
+   "type": "CONSOMME",
+   "source": "proc.essai_braise",
+   "cible": "res.bois_sec",
+   "quantite": 0.5
+  },
+  {
+   "id": 67,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.essai_braise",
+   "cible": "tech.experimentation"
+  },
+  {
+   "id": 68,
+   "type": "UTILISE",
+   "source": "proc.fabriquer_necessaire_feu",
+   "cible": "obj.eclat_tranchant",
+   "parametres": {
+    "groupe": "outil_coupant"
+   }
+  },
+  {
+   "id": 69,
+   "type": "UTILISE",
+   "source": "proc.fabriquer_necessaire_feu",
+   "cible": "obj.biface",
+   "parametres": {
+    "groupe": "outil_coupant"
+   }
+  },
+  {
+   "id": 70,
+   "type": "CONSOMME",
+   "source": "proc.fabriquer_necessaire_feu",
+   "cible": "res.bois_sec",
+   "quantite": 0.5
+  },
+  {
+   "id": 71,
+   "type": "PRODUIT",
+   "source": "proc.fabriquer_necessaire_feu",
+   "cible": "obj.necessaire_feu",
+   "quantite": 1.0
+  },
+  {
+   "id": 72,
+   "type": "DEGRADE",
+   "source": "proc.fabriquer_necessaire_feu",
+   "cible": "obj.eclat_tranchant",
+   "quantite": 8.0
+  },
+  {
+   "id": 73,
+   "type": "DEGRADE",
+   "source": "proc.fabriquer_necessaire_feu",
+   "cible": "obj.biface",
+   "quantite": 2.0
+  },
+  {
+   "id": 74,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.fabriquer_necessaire_feu",
+   "cible": "tech.decoupe"
+  },
+  {
+   "id": 75,
+   "type": "UTILISE",
+   "source": "proc.allumer_feu",
+   "cible": "obj.necessaire_feu"
+  },
+  {
+   "id": 76,
+   "type": "CONSOMME",
+   "source": "proc.allumer_feu",
+   "cible": "res.herbes_seches",
+   "quantite": 0.1
+  },
+  {
+   "id": 77,
+   "type": "CONSOMME",
+   "source": "proc.allumer_feu",
+   "cible": "res.bois_sec",
+   "quantite": 1.0
+  },
+  {
+   "id": 78,
+   "type": "PRODUIT",
+   "source": "proc.allumer_feu",
+   "cible": "ins.foyer",
+   "quantite": 1.0
+  },
+  {
+   "id": 79,
+   "type": "DEGRADE",
+   "source": "proc.allumer_feu",
+   "cible": "obj.necessaire_feu",
+   "quantite": 10.0
+  },
+  {
+   "id": 80,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.allumer_feu",
+   "cible": "tech.allumage_friction"
+  },
+  {
+   "id": 81,
+   "type": "REQUIERT",
+   "source": "proc.alimenter_feu",
+   "cible": "ins.foyer"
+  },
+  {
+   "id": 82,
+   "type": "ENTRETIENT",
+   "source": "proc.alimenter_feu",
+   "cible": "ins.foyer"
+  },
+  {
+   "id": 83,
+   "type": "CONSOMME",
+   "source": "proc.alimenter_feu",
+   "cible": "res.bois_sec",
+   "quantite": 1.0
+  },
+  {
+   "id": 84,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.alimenter_feu",
+   "cible": "tech.entretien_feu"
+  },
+  {
+   "id": 85,
+   "type": "REQUIERT",
+   "source": "proc.se_rechauffer",
+   "cible": "ins.foyer"
+  },
+  {
+   "id": 86,
+   "type": "SATISFAIT",
+   "source": "proc.se_rechauffer",
+   "cible": "bes.chaleur",
+   "quantite": 20.0
+  },
+  {
+   "id": 87,
+   "type": "SATISFAIT",
+   "source": "proc.se_rechauffer",
+   "cible": "bes.securite",
+   "quantite": 5.0
+  },
+  {
+   "id": 88,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.se_rechauffer",
+   "cible": "tech.gestes_vitaux"
+  },
+  {
+   "id": 89,
+   "type": "DEBLOQUE",
+   "source": "proc.dormir_dehors",
+   "cible": "con.protection_vent"
+  },
+  {
+   "id": 90,
+   "type": "SATISFAIT",
+   "source": "proc.dormir_dehors",
+   "cible": "bes.repos",
+   "quantite": 40.0
+  },
+  {
+   "id": 91,
+   "type": "SATISFAIT",
+   "source": "proc.dormir_dehors",
+   "cible": "bes.sante",
+   "quantite": 5.0
+  },
+  {
+   "id": 92,
+   "type": "AGGRAVE",
+   "source": "proc.dormir_dehors",
+   "cible": "bes.chaleur",
+   "quantite": 20.0
+  },
+  {
+   "id": 93,
+   "type": "AGGRAVE",
+   "source": "proc.dormir_dehors",
+   "cible": "bes.securite",
+   "quantite": 10.0
+  },
+  {
+   "id": 94,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.dormir_dehors",
+   "cible": "tech.gestes_vitaux"
+  },
+  {
+   "id": 95,
+   "type": "CONSOMME",
+   "source": "proc.construire_abri",
+   "cible": "res.branches_vertes",
+   "quantite": 15.0
+  },
+  {
+   "id": 96,
+   "type": "CONSOMME",
+   "source": "proc.construire_abri",
+   "cible": "res.feuillage",
+   "quantite": 8.0
+  },
+  {
+   "id": 97,
+   "type": "PRODUIT",
+   "source": "proc.construire_abri",
+   "cible": "ins.abri_branchages",
+   "quantite": 1.0
+  },
+  {
+   "id": 98,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.construire_abri",
+   "cible": "tech.abri_appentis"
+  },
+  {
+   "id": 99,
+   "type": "CONSOMME",
+   "source": "proc.faire_couche",
+   "cible": "res.feuillage",
+   "quantite": 4.0
+  },
+  {
+   "id": 100,
+   "type": "PRODUIT",
+   "source": "proc.faire_couche",
+   "cible": "ins.couche_feuillage",
+   "quantite": 1.0
+  },
+  {
+   "id": 101,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.faire_couche",
+   "cible": "tech.abri_appentis"
+  },
+  {
+   "id": 102,
+   "type": "REQUIERT",
+   "source": "proc.dormir_abri",
+   "cible": "ins.abri_branchages"
+  },
+  {
+   "id": 103,
+   "type": "UTILISE",
+   "source": "proc.dormir_abri",
+   "cible": "ins.couche_feuillage",
+   "parametres": {
+    "optionnel": true
+   }
+  },
+  {
+   "id": 104,
+   "type": "SATISFAIT",
+   "source": "proc.dormir_abri",
+   "cible": "bes.repos",
+   "quantite": 70.0
+  },
+  {
+   "id": 105,
+   "type": "SATISFAIT",
+   "source": "proc.dormir_abri",
+   "cible": "bes.securite",
+   "quantite": 30.0
+  },
+  {
+   "id": 106,
+   "type": "SATISFAIT",
+   "source": "proc.dormir_abri",
+   "cible": "bes.chaleur",
+   "quantite": 10.0
+  },
+  {
+   "id": 107,
+   "type": "SATISFAIT",
+   "source": "proc.dormir_abri",
+   "cible": "bes.sante",
+   "quantite": 15.0
+  },
+  {
+   "id": 108,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.dormir_abri",
+   "cible": "tech.gestes_vitaux"
+  },
+  {
+   "id": 109,
+   "type": "SPECIALISE",
+   "source": "comp.cueillette",
+   "cible": "comp.survie"
+  },
+  {
+   "id": 110,
+   "type": "SPECIALISE",
+   "source": "comp.experimentation",
+   "cible": "comp.survie"
+  },
+  {
+   "id": 111,
+   "type": "SPECIALISE",
+   "source": "comp.taille",
+   "cible": "comp.travail_pierre"
+  },
+  {
+   "id": 112,
+   "type": "SPECIALISE",
+   "source": "comp.allumage",
+   "cible": "comp.maitrise_feu"
+  },
+  {
+   "id": 113,
+   "type": "SPECIALISE",
+   "source": "comp.entretien_feu",
+   "cible": "comp.maitrise_feu"
+  },
+  {
+   "id": 114,
+   "type": "SPECIALISE",
+   "source": "comp.abris",
+   "cible": "comp.construction"
+  },
+  {
+   "id": 115,
+   "type": "RELEVE_DE",
+   "source": "tech.gestes_vitaux",
+   "cible": "comp.survie"
+  },
+  {
+   "id": 116,
+   "type": "RELEVE_DE",
+   "source": "tech.ramassage",
+   "cible": "comp.cueillette"
+  },
+  {
+   "id": 117,
+   "type": "RELEVE_DE",
+   "source": "tech.experimentation",
+   "cible": "comp.experimentation"
+  },
+  {
+   "id": 118,
+   "type": "REQUIERT",
+   "source": "tech.taille_percussion",
+   "cible": "con.silex_tranchant",
+   "contexte": "decouverte"
+  },
+  {
+   "id": 119,
+   "type": "RELEVE_DE",
+   "source": "tech.taille_percussion",
+   "cible": "comp.taille"
+  },
+  {
+   "id": 120,
+   "type": "REQUIERT",
+   "source": "tech.faconnage_bifacial",
+   "cible": "tech.taille_percussion",
+   "contexte": "decouverte"
+  },
+  {
+   "id": 121,
+   "type": "RELEVE_DE",
+   "source": "tech.faconnage_bifacial",
+   "cible": "comp.taille"
+  },
+  {
+   "id": 122,
+   "type": "REQUIERT",
+   "source": "tech.decoupe",
+   "cible": "con.silex_tranchant",
+   "contexte": "decouverte"
+  },
+  {
+   "id": 123,
+   "type": "RELEVE_DE",
+   "source": "tech.decoupe",
+   "cible": "comp.travail_bois"
+  },
+  {
+   "id": 124,
+   "type": "REQUIERT",
+   "source": "tech.allumage_friction",
+   "cible": "con.frottement_chaleur",
+   "contexte": "decouverte"
+  },
+  {
+   "id": 125,
+   "type": "REQUIERT",
+   "source": "tech.allumage_friction",
+   "cible": "con.combustion",
+   "contexte": "decouverte"
+  },
+  {
+   "id": 126,
+   "type": "RELEVE_DE",
+   "source": "tech.allumage_friction",
+   "cible": "comp.allumage"
+  },
+  {
+   "id": 127,
+   "type": "REQUIERT",
+   "source": "tech.entretien_feu",
+   "cible": "con.combustion",
+   "contexte": "decouverte"
+  },
+  {
+   "id": 128,
+   "type": "RELEVE_DE",
+   "source": "tech.entretien_feu",
+   "cible": "comp.entretien_feu"
+  },
+  {
+   "id": 129,
+   "type": "REQUIERT",
+   "source": "tech.abri_appentis",
+   "cible": "con.protection_vent",
+   "contexte": "decouverte"
+  },
+  {
+   "id": 130,
+   "type": "RELEVE_DE",
+   "source": "tech.abri_appentis",
+   "cible": "comp.abris"
+  }
+ ],
+ "depart": {
+  "solitaire": [
+   "tech.gestes_vitaux",
+   "tech.ramassage",
+   "tech.experimentation",
+   "con.plantes_comestibles",
+   "src.lac",
+   "src.buisson_baies",
+   "src.sous_bois",
+   "src.bois_mort",
+   "src.arbre",
+   "src.prairie",
+   "src.riviere_galets",
+   "src.affleurement_silex"
+  ]
+ },
+ "validation": {
+  "erreurs": 0,
+  "alertes": 0,
+  "lignes": [
+   {
+    "niveau": "INFO",
+    "controle": "Accessibilité",
+    "message": "[solitaire] 25 procédés exécutables sur 25 ; ordre de découverte : Champignons dangereux → Le silex cassé coupe → Le frottement chauffe → Le feu se nourrit → S'abriter du vent → Taille par percussion directe → Façonnage bifacial → Découpe à l'outil tranchant → Allumage par friction → Entretien du feu → Abri en appentis"
+   },
+   {
+    "niveau": "INFO",
+    "controle": "Découverte",
+    "message": "propriété cachée : Eau (res.eau) — biologique.contamination"
+   },
+   {
+    "niveau": "INFO",
+    "controle": "Découverte",
+    "message": "propriété cachée : Champignons (res.champignons) — biologique.toxicite"
+   },
+   {
+    "niveau": "INFO",
+    "controle": "Découverte",
+    "message": "propriété cachée : Bois sec (res.bois_sec) — physique.humidite"
+   },
+   {
+    "niveau": "INFO",
+    "controle": "Découverte",
+    "message": "propriété cachée : Rognon de silex (res.silex_brut) — mecanique.fracture_conchoidale"
+   }
+  ]
+ }
+}
