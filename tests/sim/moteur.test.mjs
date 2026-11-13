@@ -26,8 +26,8 @@ function jusqua(sim, proc, cible, max = 30) {
   assert.ok(sim.possede(cible), `${cible} jamais obtenu avec ${proc}`);
 }
 
-test('le référentiel est compilé : 25 procédés, chacun avec une technique', () => {
-  assert.equal(REF.procedes.size, 25);
+test('le référentiel est compilé : 26 procédés, chacun avec une technique', () => {
+  assert.equal(REF.procedes.size, 26);
   for (const p of REF.procedes.values()) assert.ok(p.technique, p.id);
 });
 
@@ -97,7 +97,7 @@ test('la chaîne du feu se découvre par l’expérimentation, puis le feu s’�
 test('le biface exige un niveau de taille ≥ 25, acquis par la pratique', () => {
   const sim = nouvelle();
   sim.perso.connait.add('tech.taille_percussion'); sim.perso.connait.add('tech.faconnage_bifacial');
-  sim.perso.inventaire['res.galet'] = 1; sim.perso.inventaire['res.silex_brut'] = 30;
+  sim.perso.inventaire['res.galet'] = 1; sim.perso.inventaire['res.silex_brut'] = 12;
   const d = sim.disponibilite('proc.faconner_biface');
   assert.equal(d.ok, false);
   assert.match(d.manques[0].raison, /taille par percussion ≥ 25/i);
@@ -155,4 +155,34 @@ test('l’IA autonome survit 7 jours et atteint ses objectifs (feu, abri, couche
       assert.ok(sim.possede(id), `graine ${graine} : ${id} non obtenu`);
     assert.ok(sim.perso.besoins['bes.sante'] > 50, `graine ${graine} : santé ${sim.perso.besoins['bes.sante']}`);
   }
+});
+
+test('transport : au-delà de 30 kg, on ne peut plus ramasser et le surplus reste au sol', () => {
+  const sim = nouvelle();
+  sim.perso.inventaire['res.bois_sec'] = 29;
+  faire(sim, 'proc.ramasser_bois_sec');          // +2 kg mais seulement 1 kg de place
+  assert.ok(Math.abs(sim.charge - 30) < 1e-6);
+  assert.ok(sim.journal.some(e => e.type === 'surcharge'));
+  const d = sim.disponibilite('proc.ramasser_bois_sec');
+  assert.equal(d.ok, false);
+  assert.match(d.manques.at(-1).raison, /trop chargé/);
+});
+
+test('transport : on ne porte pas plus de 4 outils', () => {
+  const sim = nouvelle();
+  sim.perso.connait.add('tech.taille_percussion');
+  sim.perso.inventaire['res.galet'] = 1; sim.perso.inventaire['res.silex_brut'] = 3;
+  faire(sim, 'proc.tailler_eclats'); faire(sim, 'proc.tailler_eclats');
+  assert.equal(sim.perso.objets.length, 4);
+});
+
+test('charger le feu pour la nuit : 3 bûches font tenir le feu au-delà de 4 heures', () => {
+  const sim = nouvelle();
+  sim.perso.connait.add('tech.entretien_feu');
+  sim.monde.installations.push({ uid: 1, id: 'ins.foyer', usure: 0, allume: true, combustible: 3 });
+  sim.perso.inventaire['res.bois_sec'] = 6;
+  faire(sim, 'proc.charger_feu'); faire(sim, 'proc.charger_feu');
+  assert.ok(sim.installation('ins.foyer').combustible > 8.5);
+  sim.avancerJeu(heures(5));
+  assert.ok(sim.installation('ins.foyer').allume, 'toujours allumé après 5 h');
 });

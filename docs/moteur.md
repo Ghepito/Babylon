@@ -68,8 +68,15 @@ Un feu allumé consomme 1,5 kg de bois par heure (capacité 6 kg). Il s'éteint 
 
 Ce même planificateur servira à la gestion par **objectifs et priorités** de la communauté (décision 05, palier 5).
 
-## Points de calibrage déjà repérés
+## Transport (VALIDÉ le 13/11 : « oui pour le transport »)
 
-- La cueillette progresse très vite (expert en une semaine).
-- L'IA taille beaucoup d'éclats pour s'entraîner : il faudra un besoin de stockage ou une limite de transport.
-- Le feu s'éteint chaque nuit pendant le sommeil (capacité 6 kg) : réaliste, mais à discuter.
+- À mains nues : **30 kg** au plus et **4 outils** (valeurs PROPOSÉES). Au-delà, le surplus reste au sol (journal « trop chargé »).
+- Quand les mains sont pleines, un outil usé en double est lâché pour prendre le nouveau.
+- Les déchets de taille (éclats de silex) restent sur l'aire de taille.
+- Une action qui ferait dépasser la charge est indisponible : « trop chargé (30 / 30 kg) ». On peut **poser** ce que l'on porte.
+
+## Réglages du 13/11
+
+- Cueillette : progression ×0,3 (« downgrade un peu ») → compétente en une semaine au lieu d'experte.
+- Feu : capacité portée à 12 kg et nouvelle action **« Charger le feu pour la nuit (3 bûches) »** ; l'IA fait provision de bois le soir.
+- Restes à calibrer : le feu s'éteint encore certaines nuits (vers minuit) quand la provision de bois est insuffisante.

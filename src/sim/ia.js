@@ -14,7 +14,7 @@ export const OBJECTIFS_DEFAUT = [
   { id: 'obj.biface', libelle: 'Façonner un biface' },
 ];
 
-export const RESERVES_DEFAUT = { 'res.bois_sec': 4, 'res.herbes_seches': 0.4, 'res.galet': 1, 'res.silex_brut': 2, 'res.baies': 0.4 };
+export const RESERVES_DEFAUT = { 'res.bois_sec': 3, 'res.herbes_seches': 0.3, 'res.galet': 1, 'res.silex_brut': 1, 'res.baies': 0.4 };
 
 export class IA {
   constructor(sim, { objectifs = OBJECTIFS_DEFAUT, reserves = RESERVES_DEFAUT, profondeur = 7 } = {}) {
@@ -56,9 +56,18 @@ export class IA {
     }
     if (B['bes.repos'] < 20 || (s.nuit && B['bes.repos'] < 70)) {
       if (feu && !feu.allume) { const r = this.#rallumer('rallumer le feu avant la nuit'); if (r) return r; }
-      if (feu?.allume && feu.combustible < 4 && s.possede('res.bois_sec', 1)) { const r = direct('charger le feu pour la nuit', 'proc.alimenter_feu'); if (r) return r; }
+      if (feu?.allume && feu.combustible < 10.5) {
+        if (s.possede('res.bois_sec', 3)) { const r = direct('charger le feu pour la nuit', 'proc.charger_feu'); if (r) return r; }
+        else if (s.possede('res.bois_sec', 1)) { const r = direct('charger le feu pour la nuit', 'proc.alimenter_feu'); if (r) return r; }
+        const b = this.planifier('res.bois_sec', 3); if (b && feu.combustible < 6) return { procede: b, motif: 'du bois pour la nuit' };
+      }
       const r = s.installation('ins.abri_branchages') ? direct('sommeil', 'proc.dormir_abri') : direct('sommeil', 'proc.dormir_dehors');
       if (r) return r;
+    }
+
+    // Le soir, faire provision de bois pour tenir la nuit
+    if (feu && s.heure >= 18 && s.heure < 21.5 && !s.possede('res.bois_sec', 9)) {
+      const b = this.planifier('res.bois_sec', 9); if (b) return { procede: b, motif: 'du bois pour la nuit' };
     }
 
     // 2. Objectifs

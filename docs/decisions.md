@@ -28,6 +28,7 @@ Source : [`conception-ia-externe.md`](conception-ia-externe.md) (synthèse du 13
 | 20 | Méthode | Jouabilité rapide, concepts testés palier par palier (13/11/2026) |
 | 21 | Outillage | Dépôt GitHub `Ghepito/Babylon` (13/11/2026) |
 | 22 | Moteur 3D | Babylon.js dans le navigateur (Unreal écarté, jugé trop complexe) |
+| 24 | Réglages | Cueillette plus lente ; limite de transport ; charge du feu (×2, ×3 bûches) pour tenir la nuit (13/11/2026) |
 | 23 | Référentiel V1 | Structure, contenu de la phase 1 et vue réseau validés en l'état (13/11/2026) ; valeurs numériques toujours provisoires |
 
 ## PROPOSÉ (non validé)

@@ -6,6 +6,7 @@
   nom: Eau
   unite: l
   proprietes:
+    physique: {masse_unitaire: {valeur: 1, unite: kg}}
     alimentaire: {hydratation: 100}
     biologique: {contamination: {valeur: 0.05, cachee: true}}
     degradation: {transportable: {valeur_txt: "non sans récipient"}}
@@ -61,6 +62,7 @@
   description: Pierre dure et ronde, sert de percuteur.
   unite: u
   proprietes:
+    physique: {masse_unitaire: {valeur: 0.5, unite: kg}}
     mecanique: {durete: {valeur: 0.8}}
 
 - id: res.silex_brut
@@ -71,15 +73,20 @@
 
 - id: res.eclats_silex
   nom: Éclats de silex
-  description: Déchets et éclats bruts de taille.
+  description: Déchets et éclats bruts de taille. Restent sur l'aire de taille.
   unite: u
+  attributs: {dechet: true}
 
 # --- Objets -------------------------------------------------------------------
+  proprietes:
+    physique: {masse_unitaire: {valeur: 0.02, unite: kg}}
+
 - id: obj.eclat_tranchant
   nom: Éclat tranchant
   description: Couteau rudimentaire, s'émousse vite.
   unite: u
   proprietes:
+    physique: {masse_unitaire: {valeur: 0.05, unite: kg}}
     mecanique: {tranchant: {valeur: 0.7}}
     degradation: {usure_par_usage: {valeur: 8, unite: pct}}
 
@@ -88,6 +95,7 @@
   description: Outil polyvalent façonné sur les deux faces (couper, racler, fendre).
   unite: u
   proprietes:
+    physique: {masse_unitaire: {valeur: 0.6, unite: kg}}
     mecanique: {tranchant: {valeur: 0.8}, robustesse: {valeur: 0.8}}
     degradation: {usure_par_usage: {valeur: 2, unite: pct}}
 
@@ -96,13 +104,14 @@
   description: Foret en bois et planchette creusée.
   unite: u
   proprietes:
+    physique: {masse_unitaire: {valeur: 0.4, unite: kg}}
     degradation: {usure_par_usage: {valeur: 10, unite: pct}}
 
 # --- Installations ------------------------------------------------------------
 - id: ins.foyer
   nom: Foyer
   description: Feu entretenu ; chauffe, éclaire, éloigne les animaux. S'éteint sans combustible.
-  attributs: {consommation_kg_par_heure: 1.5, capacite_kg: 6}
+  attributs: {consommation_kg_par_heure: 1.5, capacite_kg: 12}
   proprietes:
     thermique: {puissance: {valeur: 15}}
 

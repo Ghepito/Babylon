@@ -182,6 +182,15 @@
   consomme: {res.bois_sec: 1}
   entretient: [ins.foyer]
 
+- id: proc.charger_feu
+  nom: Charger le feu pour la nuit (3 bûches)
+  description: Une bonne charge de bois pour que le feu tienne plusieurs heures.
+  met_en_oeuvre: tech.entretien_feu
+  duree: 30
+  requiert: [ins.foyer]
+  consomme: {res.bois_sec: 3}
+  entretient: [ins.foyer]
+
 - id: proc.se_rechauffer
   nom: Se réchauffer près du feu
   met_en_oeuvre: tech.gestes_vitaux

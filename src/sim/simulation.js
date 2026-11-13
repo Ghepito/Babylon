@@ -39,6 +39,7 @@ export class Simulation {
         return [id, { stock: illimite ? Infinity : (a.stock ?? 10), max: illimite ? Infinity : (a.stock ?? 10), repousse: a.repousse_par_jour ?? 0 }];
       })),
       installations: [],   // {uid, id, usure, combustible?, allume?}
+      sol: {},             // ce qui a été laissé au sol (déchets, surplus) : id -> quantité
     };
 
     this.perso = {
@@ -173,6 +174,39 @@ export class Simulation {
 
   niveau(competence) { return this.perso.competences[competence] ?? 0; }
 
+  /** Masse d'une unité (kg) : 1 pour ce qui se compte en kg, sinon la propriété physique.masse_unitaire. */
+  masseUnitaire(id) {
+    const e = this.ref.get(id);
+    if (e?.unite === 'kg') return 1;
+    return Number(this.ref.propriete(id, 'physique', 'masse_unitaire') ?? 0);
+  }
+  /** Charge portée (kg). */
+  get charge() {
+    let c = 0;
+    for (const [id, q] of Object.entries(this.perso.inventaire)) c += q * this.masseUnitaire(id);
+    for (const o of this.perso.objets) c += this.masseUnitaire(o.id);
+    return c;
+  }
+  get capacite() { return REGLES.transport.capaciteKg; }
+
+  /** Poser au sol une quantité d'une ressource portée (ou un objet). */
+  deposer(id, q = Infinity) {
+    const t = this.ref.type(id);
+    if (t === 'ressource') {
+      const n = Math.min(q, this.perso.inventaire[id] ?? 0); if (n <= 0) return 0;
+      this.#retirer(id, n); this.monde.sol[id] = (this.monde.sol[id] ?? 0) + n;
+      this.noter('depot', `${this.perso.nom} pose ${fmt(Math.round(n * 100) / 100)} ${this.#unite(id)} de ${this.ref.nom(id).toLowerCase()}.`, { ressource: id });
+      return n;
+    }
+    if (t === 'objet') {
+      const o = this.perso.objets.filter(x => x.id === id).sort((a, b) => b.usure - a.usure)[0]; if (!o) return 0;
+      this.perso.objets.splice(this.perso.objets.indexOf(o), 1); this.monde.sol[id] = (this.monde.sol[id] ?? 0) + 1;
+      this.noter('depot', `${this.perso.nom} pose ${this.ref.nom(id).toLowerCase()}.`, { objet: id });
+      return 1;
+    }
+    return 0;
+  }
+
   // ---------------------------------------------------------------- actions
   /** Procédés que le personnage connaît (sa technique est connue). */
   procedesConnus() {
@@ -203,6 +237,11 @@ export class Simulation {
       if (!this.possede(c.id, c.q)) manques.push({ id: c.id, quantite: c.q, raison: `il faut ${fmt(c.q)} ${this.#unite(c.id)} de ${this.ref.nom(c.id).toLowerCase()} (${fmt(this.quantite(c.id))})` });
     for (const g of p.utilise)
       if (!g.some(id => this.possede(id))) manques.push({ id: g[0], alternatives: g, raison: `il faut : ${g.map(id => this.ref.nom(id).toLowerCase()).join(' ou ')}` });
+    const apport = p.produit.filter(s => this.ref.type(s.id) === 'ressource' || this.ref.type(s.id) === 'objet')
+      .reduce((a, s) => a + s.q * this.masseUnitaire(s.id), 0)
+      - p.consomme.reduce((a, c) => a + c.q * this.masseUnitaire(c.id), 0);
+    if (apport > 0.001 && this.charge + Math.min(apport, 0.5) > this.capacite + 1e-9)
+      manques.push({ id: 'transport', raison: `trop chargé (${fmt(Math.round(this.charge * 10) / 10)} / ${this.capacite} kg)` });
     if (p.condition && !this.#condition(p.condition))
       manques.push({ id: p.condition.competence ?? 'condition', condition: p.condition, raison: texteCondition(p.condition, this) });
     return { ok: manques.length === 0, manques };
@@ -332,8 +371,29 @@ export class Simulation {
 
   #ajouter(id, q, proc) {
     const t = this.ref.type(id);
-    if (t === 'ressource') this.perso.inventaire[id] = (this.perso.inventaire[id] ?? 0) + q;
-    else if (t === 'objet') for (let i = 0; i < q; i++) this.perso.objets.push({ uid: ++this.uid, id, usure: 0 });
+    if (t === 'ressource' && this.ref.attr(id, 'dechet')) {
+      // les déchets restent sur place (ils pourront servir plus tard)
+      this.monde.sol[id] = (this.monde.sol[id] ?? 0) + q;
+    }
+    else if (t === 'ressource') {
+      const m = this.masseUnitaire(id);
+      const place = m > 0 ? Math.max(0, (this.capacite - this.charge) / m) : q;
+      const garde = Math.min(q, place);
+      if (garde > 1e-9) this.perso.inventaire[id] = (this.perso.inventaire[id] ?? 0) + garde;
+      if (q - garde > 1e-6) this.noter('surcharge', `Trop chargé : ${fmt(Math.round((q - garde) * 100) / 100)} ${this.#unite(id)} de ${this.ref.nom(id).toLowerCase()} laissé(s) au sol.`, { ressource: id });
+    }
+    else if (t === 'objet') for (let i = 0; i < q; i++) {
+      if (this.perso.objets.length >= REGLES.transport.outilsMax) {
+        // mains pleines : on lâche le plus usé d'un outil en double pour prendre le nouveau
+        const doublons = this.perso.objets.filter(o => o.id !== id && this.perso.objets.filter(x => x.id === o.id).length > 1);
+        const lache = doublons.sort((a, b) => b.usure - a.usure)[0];
+        if (lache) { this.perso.objets.splice(this.perso.objets.indexOf(lache), 1); this.monde.sol[lache.id] = (this.monde.sol[lache.id] ?? 0) + 1; this.noter('surcharge', `Mains pleines : ${this.ref.nom(lache.id).toLowerCase()} usé laissé au sol pour prendre ${this.ref.nom(id).toLowerCase()}.`, { objet: lache.id }); }
+      }
+      if (this.perso.objets.length >= REGLES.transport.outilsMax || this.charge + this.masseUnitaire(id) > this.capacite + 1e-9) {
+        this.noter('surcharge', `Mains pleines : ${this.ref.nom(id).toLowerCase()} laissé au sol.`, { objet: id }); continue;
+      }
+      this.perso.objets.push({ uid: ++this.uid, id, usure: 0 });
+    }
     else if (t === 'installation') {
       const existant = this.installation(id);
       const combustible = this.ref.attr(id, 'consommation_kg_par_heure') != null
@@ -359,7 +419,7 @@ export class Simulation {
     if (X.sansProgression.includes(proc.technique)) return;
     const comp = this.ref.competenceDe.get(proc.technique);
     if (!comp) return;
-    let gain = (X.base + proc.duree / 60 * X.parMinute) * (1 - this.niveau(comp) / 100);
+    let gain = (X.base + proc.duree / 60 * X.parMinute) * (1 - this.niveau(comp) / 100) * (X.facteurTechnique[proc.technique] ?? 1);
     gain = Math.min(gain, X.maxParAction);
     let c = comp, part = 1;
     while (c) {

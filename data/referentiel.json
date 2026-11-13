@@ -1,6 +1,6 @@
 {
  "version_schema": "1.0-propose",
- "genere_le": "2026-11-13T17:01:14+00:00",
+ "genere_le": "2026-11-13T17:17:51+00:00",
  "types": [
   {
    "code": "besoin",
@@ -237,6 +237,12 @@
    "unite": "l",
    "attributs": {},
    "proprietes": {
+    "physique": {
+     "masse_unitaire": {
+      "valeur": 1.0,
+      "unite": "kg"
+     }
+    },
     "alimentaire": {
      "hydratation": {
       "valeur": 100.0
@@ -403,6 +409,12 @@
    "unite": "u",
    "attributs": {},
    "proprietes": {
+    "physique": {
+     "masse_unitaire": {
+      "valeur": 0.5,
+      "unite": "kg"
+     }
+    },
     "mecanique": {
      "durete": {
       "valeur": 0.8
@@ -435,12 +447,21 @@
    "id": "res.eclats_silex",
    "type": "ressource",
    "nom": "Éclats de silex",
-   "description": "Déchets et éclats bruts de taille.",
+   "description": "Déchets et éclats bruts de taille. Restent sur l'aire de taille.",
    "phase": 1,
    "statut": "PROPOSE",
    "unite": "u",
-   "attributs": {},
-   "proprietes": {}
+   "attributs": {
+    "dechet": true
+   },
+   "proprietes": {
+    "physique": {
+     "masse_unitaire": {
+      "valeur": 0.02,
+      "unite": "kg"
+     }
+    }
+   }
   },
   {
    "id": "obj.eclat_tranchant",
@@ -452,6 +473,12 @@
    "unite": "u",
    "attributs": {},
    "proprietes": {
+    "physique": {
+     "masse_unitaire": {
+      "valeur": 0.05,
+      "unite": "kg"
+     }
+    },
     "mecanique": {
      "tranchant": {
       "valeur": 0.7
@@ -475,6 +502,12 @@
    "unite": "u",
    "attributs": {},
    "proprietes": {
+    "physique": {
+     "masse_unitaire": {
+      "valeur": 0.6,
+      "unite": "kg"
+     }
+    },
     "mecanique": {
      "tranchant": {
       "valeur": 0.8
@@ -501,6 +534,12 @@
    "unite": "u",
    "attributs": {},
    "proprietes": {
+    "physique": {
+     "masse_unitaire": {
+      "valeur": 0.4,
+      "unite": "kg"
+     }
+    },
     "degradation": {
      "usure_par_usage": {
       "valeur": 10.0,
@@ -519,7 +558,7 @@
    "unite": null,
    "attributs": {
     "consommation_kg_par_heure": 1.5,
-    "capacite_kg": 6
+    "capacite_kg": 12
    },
    "proprietes": {
     "thermique": {
@@ -964,6 +1003,19 @@
    "unite": null,
    "attributs": {
     "duree_s": 10
+   },
+   "proprietes": {}
+  },
+  {
+   "id": "proc.charger_feu",
+   "type": "procede",
+   "nom": "Charger le feu pour la nuit (3 bûches)",
+   "description": "Une bonne charge de bois pour que le feu tienne plusieurs heures.",
+   "phase": 1,
+   "statut": "PROPOSE",
+   "unite": null,
+   "attributs": {
+    "duree_s": 30
    },
    "proprietes": {}
   },
@@ -1902,124 +1954,149 @@
   {
    "id": 86,
    "type": "REQUIERT",
-   "source": "proc.se_rechauffer",
+   "source": "proc.charger_feu",
    "cible": "ins.foyer"
   },
   {
    "id": 87,
+   "type": "ENTRETIENT",
+   "source": "proc.charger_feu",
+   "cible": "ins.foyer"
+  },
+  {
+   "id": 88,
+   "type": "CONSOMME",
+   "source": "proc.charger_feu",
+   "cible": "res.bois_sec",
+   "quantite": 3.0
+  },
+  {
+   "id": 89,
+   "type": "MET_EN_OEUVRE",
+   "source": "proc.charger_feu",
+   "cible": "tech.entretien_feu"
+  },
+  {
+   "id": 90,
+   "type": "REQUIERT",
+   "source": "proc.se_rechauffer",
+   "cible": "ins.foyer"
+  },
+  {
+   "id": 91,
    "type": "SATISFAIT",
    "source": "proc.se_rechauffer",
    "cible": "bes.chaleur",
    "quantite": 20.0
   },
   {
-   "id": 88,
+   "id": 92,
    "type": "SATISFAIT",
    "source": "proc.se_rechauffer",
    "cible": "bes.securite",
    "quantite": 5.0
   },
   {
-   "id": 89,
+   "id": 93,
    "type": "MET_EN_OEUVRE",
    "source": "proc.se_rechauffer",
    "cible": "tech.gestes_vitaux"
   },
   {
-   "id": 90,
+   "id": 94,
    "type": "DEBLOQUE",
    "source": "proc.dormir_dehors",
    "cible": "con.protection_vent"
   },
   {
-   "id": 91,
+   "id": 95,
    "type": "SATISFAIT",
    "source": "proc.dormir_dehors",
    "cible": "bes.repos",
    "quantite": 40.0
   },
   {
-   "id": 92,
+   "id": 96,
    "type": "SATISFAIT",
    "source": "proc.dormir_dehors",
    "cible": "bes.sante",
    "quantite": 5.0
   },
   {
-   "id": 93,
+   "id": 97,
    "type": "AGGRAVE",
    "source": "proc.dormir_dehors",
    "cible": "bes.chaleur",
    "quantite": 20.0
   },
   {
-   "id": 94,
+   "id": 98,
    "type": "AGGRAVE",
    "source": "proc.dormir_dehors",
    "cible": "bes.securite",
    "quantite": 10.0
   },
   {
-   "id": 95,
+   "id": 99,
    "type": "MET_EN_OEUVRE",
    "source": "proc.dormir_dehors",
    "cible": "tech.gestes_vitaux"
   },
   {
-   "id": 96,
+   "id": 100,
    "type": "CONSOMME",
    "source": "proc.construire_abri",
    "cible": "res.branches_vertes",
    "quantite": 15.0
   },
   {
-   "id": 97,
+   "id": 101,
    "type": "CONSOMME",
    "source": "proc.construire_abri",
    "cible": "res.feuillage",
    "quantite": 8.0
   },
   {
-   "id": 98,
+   "id": 102,
    "type": "PRODUIT",
    "source": "proc.construire_abri",
    "cible": "ins.abri_branchages",
    "quantite": 1.0
   },
   {
-   "id": 99,
+   "id": 103,
    "type": "MET_EN_OEUVRE",
    "source": "proc.construire_abri",
    "cible": "tech.abri_appentis"
   },
   {
-   "id": 100,
+   "id": 104,
    "type": "CONSOMME",
    "source": "proc.faire_couche",
    "cible": "res.feuillage",
    "quantite": 4.0
   },
   {
-   "id": 101,
+   "id": 105,
    "type": "PRODUIT",
    "source": "proc.faire_couche",
    "cible": "ins.couche_feuillage",
    "quantite": 1.0
   },
   {
-   "id": 102,
+   "id": 106,
    "type": "MET_EN_OEUVRE",
    "source": "proc.faire_couche",
    "cible": "tech.abri_appentis"
   },
   {
-   "id": 103,
+   "id": 107,
    "type": "REQUIERT",
    "source": "proc.dormir_abri",
    "cible": "ins.abri_branchages"
   },
   {
-   "id": 104,
+   "id": 108,
    "type": "UTILISE",
    "source": "proc.dormir_abri",
    "cible": "ins.couche_feuillage",
@@ -2028,174 +2105,174 @@
    }
   },
   {
-   "id": 105,
+   "id": 109,
    "type": "SATISFAIT",
    "source": "proc.dormir_abri",
    "cible": "bes.repos",
    "quantite": 70.0
   },
   {
-   "id": 106,
+   "id": 110,
    "type": "SATISFAIT",
    "source": "proc.dormir_abri",
    "cible": "bes.securite",
    "quantite": 30.0
   },
   {
-   "id": 107,
+   "id": 111,
    "type": "SATISFAIT",
    "source": "proc.dormir_abri",
    "cible": "bes.chaleur",
    "quantite": 10.0
   },
   {
-   "id": 108,
+   "id": 112,
    "type": "SATISFAIT",
    "source": "proc.dormir_abri",
    "cible": "bes.sante",
    "quantite": 15.0
   },
   {
-   "id": 109,
+   "id": 113,
    "type": "MET_EN_OEUVRE",
    "source": "proc.dormir_abri",
    "cible": "tech.gestes_vitaux"
   },
   {
-   "id": 110,
+   "id": 114,
    "type": "SPECIALISE",
    "source": "comp.cueillette",
    "cible": "comp.survie"
   },
   {
-   "id": 111,
+   "id": 115,
    "type": "SPECIALISE",
    "source": "comp.experimentation",
    "cible": "comp.survie"
   },
   {
-   "id": 112,
+   "id": 116,
    "type": "SPECIALISE",
    "source": "comp.taille",
    "cible": "comp.travail_pierre"
   },
   {
-   "id": 113,
+   "id": 117,
    "type": "SPECIALISE",
    "source": "comp.allumage",
    "cible": "comp.maitrise_feu"
   },
   {
-   "id": 114,
+   "id": 118,
    "type": "SPECIALISE",
    "source": "comp.entretien_feu",
    "cible": "comp.maitrise_feu"
   },
   {
-   "id": 115,
+   "id": 119,
    "type": "SPECIALISE",
    "source": "comp.abris",
    "cible": "comp.construction"
   },
   {
-   "id": 116,
+   "id": 120,
    "type": "RELEVE_DE",
    "source": "tech.gestes_vitaux",
    "cible": "comp.survie"
   },
   {
-   "id": 117,
+   "id": 121,
    "type": "RELEVE_DE",
    "source": "tech.ramassage",
    "cible": "comp.cueillette"
   },
   {
-   "id": 118,
+   "id": 122,
    "type": "RELEVE_DE",
    "source": "tech.experimentation",
    "cible": "comp.experimentation"
   },
   {
-   "id": 119,
-   "type": "REQUIERT",
-   "source": "tech.taille_percussion",
-   "cible": "con.silex_tranchant",
-   "contexte": "decouverte"
-  },
-  {
-   "id": 120,
-   "type": "RELEVE_DE",
-   "source": "tech.taille_percussion",
-   "cible": "comp.taille"
-  },
-  {
-   "id": 121,
-   "type": "REQUIERT",
-   "source": "tech.faconnage_bifacial",
-   "cible": "tech.taille_percussion",
-   "contexte": "decouverte"
-  },
-  {
-   "id": 122,
-   "type": "RELEVE_DE",
-   "source": "tech.faconnage_bifacial",
-   "cible": "comp.taille"
-  },
-  {
    "id": 123,
    "type": "REQUIERT",
-   "source": "tech.decoupe",
+   "source": "tech.taille_percussion",
    "cible": "con.silex_tranchant",
    "contexte": "decouverte"
   },
   {
    "id": 124,
    "type": "RELEVE_DE",
+   "source": "tech.taille_percussion",
+   "cible": "comp.taille"
+  },
+  {
+   "id": 125,
+   "type": "REQUIERT",
+   "source": "tech.faconnage_bifacial",
+   "cible": "tech.taille_percussion",
+   "contexte": "decouverte"
+  },
+  {
+   "id": 126,
+   "type": "RELEVE_DE",
+   "source": "tech.faconnage_bifacial",
+   "cible": "comp.taille"
+  },
+  {
+   "id": 127,
+   "type": "REQUIERT",
+   "source": "tech.decoupe",
+   "cible": "con.silex_tranchant",
+   "contexte": "decouverte"
+  },
+  {
+   "id": 128,
+   "type": "RELEVE_DE",
    "source": "tech.decoupe",
    "cible": "comp.travail_bois"
   },
   {
-   "id": 125,
+   "id": 129,
    "type": "REQUIERT",
    "source": "tech.allumage_friction",
    "cible": "con.frottement_chaleur",
    "contexte": "decouverte"
   },
   {
-   "id": 126,
+   "id": 130,
    "type": "REQUIERT",
    "source": "tech.allumage_friction",
    "cible": "con.combustion",
    "contexte": "decouverte"
   },
   {
-   "id": 127,
+   "id": 131,
    "type": "RELEVE_DE",
    "source": "tech.allumage_friction",
    "cible": "comp.allumage"
   },
   {
-   "id": 128,
+   "id": 132,
    "type": "REQUIERT",
    "source": "tech.entretien_feu",
    "cible": "con.combustion",
    "contexte": "decouverte"
   },
   {
-   "id": 129,
+   "id": 133,
    "type": "RELEVE_DE",
    "source": "tech.entretien_feu",
    "cible": "comp.entretien_feu"
   },
   {
-   "id": 130,
+   "id": 134,
    "type": "REQUIERT",
    "source": "tech.abri_appentis",
    "cible": "con.protection_vent",
    "contexte": "decouverte"
   },
   {
-   "id": 131,
+   "id": 135,
    "type": "RELEVE_DE",
    "source": "tech.abri_appentis",
    "cible": "comp.abris"
@@ -2224,7 +2301,7 @@
    {
     "niveau": "INFO",
     "controle": "Accessibilité",
-    "message": "[solitaire] 25 procédés exécutables sur 25 ; ordre de découverte : Champignons dangereux → Le silex cassé coupe → Le frottement chauffe → Le feu se nourrit → S'abriter du vent → Taille par percussion directe → Façonnage bifacial → Découpe à l'outil tranchant → Allumage par friction → Entretien du feu → Abri en appentis"
+    "message": "[solitaire] 26 procédés exécutables sur 26 ; ordre de découverte : Champignons dangereux → Le silex cassé coupe → Le frottement chauffe → Le feu se nourrit → S'abriter du vent → Taille par percussion directe → Façonnage bifacial → Découpe à l'outil tranchant → Allumage par friction → Entretien du feu → Abri en appentis"
    },
    {
     "niveau": "INFO",

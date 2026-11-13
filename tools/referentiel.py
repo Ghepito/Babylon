@@ -314,6 +314,10 @@ def valider(cx) -> Rapport:
                 rp.alerte("Structure", f"{nom(e['id'])} ne produit, ne satisfait, ne débloque et n'entretient rien")
         if e["type"] == "technique" and sum(1 for r in s if r["type"] == "RELEVE_DE") != 1:
             rp.erreur("Structure", f"{nom(e['id'])} doit relever d'exactement une compétence")
+    masses = {eid for (eid,) in cx.execute("SELECT element_id FROM propriete WHERE module='physique' AND cle='masse_unitaire'")}
+    for e in E.values():
+        if e["type"] in ("ressource", "objet") and e["unite"] != "kg" and e["id"] not in masses:
+            rp.erreur("Transport", f"{nom(e['id'])} se compte en « {e['unite']} » mais n'a pas de masse unitaire (physique.masse_unitaire) : impossible de calculer la charge portée")
     for e in E.values():
         if e["type"] == "installation" and e["attributs"].get("consommation_kg_par_heure"):
             if not any(r["type"] == "ALIMENTE" for r in entrantes[e["id"]]):

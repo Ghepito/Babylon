@@ -32,9 +32,13 @@ export const REGLES = {
     maxParAction: 8,
     partGenerale: 0.3,        // part transmise à la compétence générale (« Taille » → « Travail de la pierre »)
     sansProgression: ['tech.gestes_vitaux'],   // boire, manger, dormir ne font pas progresser
+    facteurTechnique: { 'tech.ramassage': 0.3 }, // gestes simples : progression plus lente (validé le 13/11 : « downgrade un peu »)
   },
 
   feu: { combustibleAllumage: 1.5 },
+
+  // Transport à mains nues (pas encore de sac) : au-delà, le surplus reste au sol
+  transport: { capaciteKg: 30, outilsMax: 4 },
 
   // La compétence d'observation augmente les chances de comprendre lors d'une expérimentation
   competenceDecouverte: 'comp.experimentation',   // kg de combustible dans un feu qu'on vient d'allumer, par kg de bois utilisé

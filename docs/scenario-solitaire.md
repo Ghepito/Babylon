@@ -19,42 +19,42 @@
 | Jour 1, 08h39 | 🏁 **Allumer un feu par friction terminé → 1 foyer.** |
 | Jour 1, 09h40 | Le feu s'est éteint faute de bois. |
 | Jour 1, 09h57 | 🏁 **Façonner un biface terminé → 1 u biface, 10 u éclats de silex.** |
-| Jour 2, 00h05 | Le feu s'est éteint faute de bois. |
-| Jour 2, 07h03 | Dormir à la belle étoile : chaleur −20. |
-| Jour 2, 07h03 | Dormir à la belle étoile : sécurité −10. |
-| Jour 2, 07h03 | 💡 Arok comprend : « S'abriter du vent ». |
-| Jour 2, 07h03 | ✨ Découverte : Abri en appentis ! |
-| Jour 2, 08h48 | 🏁 **Construire un abri en appentis terminé → 1 abri de branchages.** |
-| Jour 2, 09h01 | 🏁 **Préparer une couche de feuillage terminé → 1 couche de feuillage.** |
-| Jour 2, 10h55 | Le feu s'est éteint faute de bois. |
+| Jour 1, 17h10 | Soif critique ! |
+| Jour 2, 02h05 | Le feu s'est éteint faute de bois. |
+| Jour 2, 08h01 | Dormir à la belle étoile : chaleur −20. |
+| Jour 2, 08h01 | Dormir à la belle étoile : sécurité −10. |
+| Jour 2, 08h01 | 💡 Arok comprend : « S'abriter du vent ». |
+| Jour 2, 08h01 | ✨ Découverte : Abri en appentis ! |
+| Jour 2, 09h48 | 🏁 **Construire un abri en appentis terminé → 1 abri de branchages.** |
+| Jour 2, 10h09 | 🏁 **Préparer une couche de feuillage terminé → 1 couche de feuillage.** |
+| Jour 2, 11h55 | Le feu s'est éteint faute de bois. |
 | Jour 3, 00h05 | Le feu s'est éteint faute de bois. |
-| Jour 4, 00h05 | Le feu s'est éteint faute de bois. |
 | Jour 6, 00h05 | Le feu s'est éteint faute de bois. |
 
 ## Besoins chaque soir à 20 h (0-100)
 
 | Jour | Soif | Faim | Repos | Chaleur | Sécurité | Santé | Installations |
 |---|---|---|---|---|---|---|---|
-| 1 | 73 | 54 | 49 | 79 | 48 | 100 | foyer |
-| 2 | 59 | 57 | 40 | 100 | 34 | 100 | foyer, abri de branchages, couche de feuillage |
-| 3 | 69 | 59 | 62 | 100 | 45 | 100 | foyer, abri de branchages, couche de feuillage |
-| 4 | 78 | 51 | 66 | 100 | 55 | 100 | foyer, abri de branchages, couche de feuillage |
-| 5 | 62 | 54 | 66 | 100 | 66 | 100 | foyer, abri de branchages, couche de feuillage |
-| 6 | 71 | 56 | 66 | 100 | 77 | 100 | foyer, abri de branchages, couche de feuillage |
-| 7 | 55 | 58 | 66 | 100 | 86 | 100 | foyer, abri de branchages, couche de feuillage |
+| 1 | 0 | 34 | 49 | 79 | 48 | 96 | foyer |
+| 2 | 69 | 58 | 41 | 96 | 29 | 100 | foyer, abri de branchages, couche de feuillage |
+| 3 | 56 | 51 | 63 | 100 | 40 | 100 | foyer, abri de branchages, couche de feuillage |
+| 4 | 68 | 54 | 68 | 100 | 51 | 100 | foyer, abri de branchages, couche de feuillage |
+| 5 | 79 | 58 | 68 | 100 | 63 | 100 | foyer, abri de branchages, couche de feuillage |
+| 6 | 65 | 51 | 68 | 100 | 74 | 100 | foyer, abri de branchages, couche de feuillage |
+| 7 | 76 | 54 | 67 | 100 | 85 | 100 | foyer, abri de branchages, couche de feuillage |
 
 ## Compétences acquises
 
 | Compétence | Niveau | Palier |
 |---|---|---|
-| Cueillette | 96 | expert |
+| Cueillette | 59 | compétent |
 | Taille par percussion | 34 | apprenti |
-| Survie | 34 | apprenti |
-| Allumage | 31 | apprenti |
 | Entretien du feu | 30 | apprenti |
+| Allumage | 27 | apprenti |
 | Travail du bois | 24 | initié |
+| Survie | 24 | initié |
 | Observation et expérimentation | 19 | initié |
-| Maîtrise du feu | 18 | initié |
+| Maîtrise du feu | 17 | initié |
 | Abris sommaires | 14 | initié |
 | Travail de la pierre | 10 | initié |
 | Construction | 4 | novice |
@@ -63,22 +63,22 @@
 
 | Procédé | Nombre |
 |---|---|
-| Cueillir des baies | 41 |
-| Manger des baies | 39 |
-| Puiser de l'eau dans ses mains | 32 |
-| Boire | 32 |
+| Cueillir des baies | 40 |
+| Manger des baies | 38 |
+| Puiser de l'eau dans ses mains | 31 |
+| Boire | 31 |
 | Remettre du bois dans le feu | 16 |
 | Ramasser du bois mort | 13 |
 | Arracher du feuillage | 12 |
-| Ramasser des herbes sèches | 6 |
 | Ramasser des rognons de silex | 6 |
-| Allumer un feu par friction | 6 |
 | Tailler des éclats tranchants | 6 |
 | Dormir dans l'abri | 6 |
+| Ramasser des herbes sèches | 5 |
+| Allumer un feu par friction | 5 |
 | Couper des branches vertes | 5 |
-| Se réchauffer près du feu | 3 |
 | Frotter deux bois l'un contre l'autre | 2 |
 | Frapper un silex avec un galet | 2 |
+| Se réchauffer près du feu | 2 |
 | Faire tomber la braise dans des herbes sèches | 1 |
 | Choisir un galet | 1 |
 | Fabriquer un foret et une planchette | 1 |
