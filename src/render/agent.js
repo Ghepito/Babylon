@@ -72,23 +72,41 @@ export class Agent {
 
   #demarrer(ordre) {
     this.courant = ordre;
-    if (ordre.type === 'aller') { this.cible = { x: ordre.x, z: ordre.z, rayon: 0.2 }; this.phase = 'marche'; return; }
+    if (ordre.type !== 'procede') {      // aller, prendre dans un tas, déposer dans un tas
+      this.cible = { x: ordre.x, z: ordre.z, rayon: ordre.type === 'aller' ? 0.2 : 1.2 }; this.phase = 'marche'; return;
+    }
     const proc = this.sim.ref.procedes.get(ordre.procede);
-    const d = this.sim.disponibilite(ordre.procede);
+    const dest = this.carte.destination(proc, { x: this.x, z: this.z }, this.sim, ordre.site ?? null);
+    ordre.site = dest?.site ?? ordre.site ?? null;
+    ordre.lieu = dest ? { x: dest.x, z: dest.z } : { x: this.x, z: this.z };
+    const d = this.sim.disponibilite(ordre.procede, this.#options(ordre, proc));
     if (!d.ok) { this.surEvenement({ type: 'refus', procede: ordre.procede, raison: d.manques[0]?.raison }); this.courant = null; return; }
-    const dest = this.carte.destination(proc, { x: this.x, z: this.z }, this.sim);
     ordre.regarder = dest?.regarder ?? null;
     if (dest && Math.hypot(dest.x - this.x, dest.z - this.z) > (dest.rayon ?? 0.3) + 0.2) { this.cible = dest; this.phase = 'marche'; }
     else this.#lancer();
   }
 
   #arrive() {
-    if (this.courant?.type === 'procede') this.#lancer();
-    else { this.courant = null; this.phase = 'repos'; }
+    const o = this.courant;
+    if (o?.type === 'procede') return this.#lancer();
+    if (o?.type === 'prendre') this.sim.prendre(o.tas, o.id, o.q ?? Infinity);
+    if (o?.type === 'deposer') this.sim.deposer(o.id, o.q ?? Infinity, { tas: o.tas });
+    this.courant = null; this.phase = 'repos';
+  }
+
+  /** Site visé et tas à portée (à moins de 4 m du lieu de l'action ; la réserve du camp pour les actions au campement). */
+  #options(ordre, proc) {
+    const lieu = ordre.lieu ?? { x: this.x, z: this.z };
+    const tas = this.sim.monde.tas.filter(t => {
+      if (t.camp) return this.sim.auCamp(proc) || Math.hypot(this.carte.POS_RESERVE.x - lieu.x, this.carte.POS_RESERVE.z - lieu.z) < 6;
+      return t.position && Math.hypot(t.position.x - lieu.x, t.position.z - lieu.z) < 4;
+    }).map(t => t.uid);
+    return { site: ordre.site ?? null, tas };
   }
 
   #lancer() {
-    const r = this.sim.lancer(this.courant.procede);
+    const proc = this.sim.ref.procedes.get(this.courant.procede);
+    const r = this.sim.lancer(this.courant.procede, this.#options(this.courant, proc));
     if (!r.ok) { this.surEvenement({ type: 'refus', procede: this.courant.procede, raison: r.manques[0]?.raison }); this.courant = null; this.phase = 'repos'; return; }
     this.phase = 'action';
   }

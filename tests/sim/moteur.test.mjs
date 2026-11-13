@@ -186,3 +186,37 @@ test('charger le feu pour la nuit : 3 bûches font tenir le feu au-delà de 4 he
   sim.avancerJeu(heures(5));
   assert.ok(sim.installation('ins.foyer').allume, 'toujours allumé après 5 h');
 });
+
+test('chaque arbre a son propre stock : en épuiser un ne vide pas les autres', () => {
+  const sim = nouvelle();
+  sim.perso.connait.add('tech.decoupe');
+  sim.perso.objets.push({ uid: 50, id: 'obj.biface', usure: 0 });
+  sim.definirSites('src.arbre', ['arbre_1', 'arbre_2']);
+  sim.site('src.arbre', 'arbre_1').stock = 3;
+  const r = sim.lancer('proc.couper_branches', { site: 'arbre_1' }); assert.ok(r.ok);
+  while (sim.perso.action) sim.avancerJeu(10);
+  assert.ok(sim.site('src.arbre', 'arbre_1').stock < 0.01, 'arbre 1 épuisé (la repousse commence à peine)');
+  assert.ok(sim.site('src.arbre', 'arbre_2').stock >= 40 - 1e-9);
+  const d = sim.disponibilite('proc.couper_branches', { site: 'arbre_1' });
+  assert.equal(d.ok, false); assert.match(d.manques[0].raison, /épuisé\(e\) ici/);
+  assert.ok(sim.disponibilite('proc.couper_branches', { site: 'arbre_2' }).ok);
+  assert.ok(sim.disponibilite('proc.couper_branches').ok, 'sans site précisé, un autre arbre convient');
+});
+
+test('stockage au sol : déposer, reprendre, et construire avec la réserve du camp', () => {
+  const sim = nouvelle();
+  sim.perso.connait.add('tech.abri_appentis');
+  sim.perso.inventaire['res.branches_vertes'] = 15; sim.perso.inventaire['res.feuillage'] = 8;
+  const tas = sim.deposer('res.branches_vertes', 15, { camp: true });
+  assert.ok(tas.camp); assert.equal(sim.quantite('res.branches_vertes'), 0);
+  assert.ok(sim.disponibilite('proc.construire_abri').ok, 'la réserve du camp sert à construire');
+  const sol = sim.deposer('res.feuillage', 3, { position: { x: 1, z: 2 } });
+  assert.equal(sim.prendre(sol.uid, 'res.feuillage'), 3);
+  assert.ok(!sim.tas(sol.uid), 'un tas vide disparaît');
+  while (!sim.perso.action) { sim.lancer('proc.construire_abri'); }
+  while (sim.perso.action) sim.avancerJeu(60);
+  assert.ok(sim.possede('ins.abri_branchages'));
+  assert.equal(sim.reserveCamp.contenu['res.branches_vertes'], undefined);
+  const etat = JSON.parse(JSON.stringify(sim.exporterEtat()));
+  assert.ok(Simulation.restaurer(REF, etat).reserveCamp, 'la réserve est sauvegardée');
+});

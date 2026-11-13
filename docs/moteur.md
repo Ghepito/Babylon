@@ -80,3 +80,12 @@ Ce même planificateur servira à la gestion par **objectifs et priorités** de 
 - Cueillette : progression ×0,3 (« downgrade un peu ») → compétente en une semaine au lieu d'experte.
 - Feu : capacité portée à 12 kg et nouvelle action **« Charger le feu pour la nuit (3 bûches) »** ; l'IA fait provision de bois le soir.
 - Restes à calibrer : le feu s'éteint encore certaines nuits (vers minuit) quand la provision de bois est insuffisante.
+
+## Stocks par lieu et stockage au sol (14/11 — demandé par Laurent-Olivier)
+
+- **Chaque arbre, buisson, tas de bois mort, coin à champignons, affleurement de silex a son propre stock** (un « site »).
+  Épuiser un arbre ne touche pas les autres ; il repousse lentement. Le lac reste inépuisable.
+- `lancer(procédé, { site })` agit sur le site visé ; sans site précisé, le moteur prend le mieux pourvu.
+- **Stockage au sol** : `deposer()` pose dans la **réserve du camp** ou dans un tas au sol ; `prendre()` reprend (dans la limite de ce que l'on peut porter).
+- Les actions puisent dans ce que l'on porte **et** dans les tas à portée : une construction ou le feu du campement utilisent directement la réserve du camp.
+  Plus besoin de porter les 23 kg de l'abri d'un coup.

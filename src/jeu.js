@@ -31,6 +31,7 @@ async function demarrer() {
     desabonner();
     sim = etat ? Simulation.restaurer(REF, etat.sim) : new Simulation(REF, { graine: Math.floor(Math.random() * 1e6), nom: 'Arok', heureDepart: 8 });
     ia = new IA(sim);
+    carte.enregistrerSites(sim);   // un stock par arbre, buisson, tas de bois mort… (les valeurs sauvegardées sont conservées)
     const depart = etat?.agent ?? { x: CAMP.x + 2, z: CAMP.z - 2, cap: 0 };
     rig.root.position.set(depart.x, height(depart.x, depart.z), depart.z);
     agent = new Agent(sim, rig, carte, { surEvenement: e => { if (e.type === 'refus') toast(`${REF.nom(e.procede)} : ${e.raison}`); } });
@@ -68,10 +69,10 @@ async function demarrer() {
   $('aideX').onclick = () => $('aide').classList.add('cache');
 
   // ------------------------------------------------------------ ordres du joueur
-  function ordonner(procede, file = false) {
-    fermerMenu();
-    if ($('ia').checked) { $('ia').checked = false; toast('IA autonome désactivée : vous reprenez la main'); }
-    agent.ordonner({ type: 'procede', procede }, { file });
+  function reprendreLaMain() { if ($('ia').checked) { $('ia').checked = false; toast('IA autonome désactivée : vous reprenez la main'); } }
+  function ordonner(procede, file = false, site = null) {
+    fermerMenu(); reprendreLaMain();
+    agent.ordonner({ type: 'procede', procede, site }, { file });
     rendreHUD(true);
   }
   // Procédés liés à un élément du monde
@@ -86,6 +87,7 @@ async function demarrer() {
   env.clics.surClic = (pick, ev) => {
     const meta = pick?.hit ? pick.pickedMesh.metadata : null;
     if (meta && (meta.kind === 'source' || meta.kind === 'installation')) return ouvrirMenu(meta, ev);
+    if (meta?.kind === 'tas') return ouvrirMenuTas(meta, ev);
     if (meta?.kind === 'perso') return ouvrirMenuPerso(ev);
     fermerMenu();
     if (pick?.hit && pick.pickedPoint && height(pick.pickedPoint.x, pick.pickedPoint.z) > 0.3) {
@@ -99,27 +101,38 @@ async function demarrer() {
     const nomEl = REF.nom(meta.id);
     let corps = '';
     if (meta.kind === 'source') {
-      const s = sim.monde.sources[meta.id];
-      corps += `<div class="info">${s ? (s.stock === Infinity ? 'Inépuisable' : `Disponible : ${fmt(s.stock)} ${REF.get(meta.id).attributs?.unite_stock ?? ''}`) : 'Absent de ce monde'}</div>`;
+      const x = meta.site ? sim.site(meta.id, meta.site) : Object.values(sim.monde.sources[meta.id]?.sites ?? {})[0];
+      const u = REF.get(meta.id).attributs?.unite_stock ?? '';
+      corps += `<div class="info">${x ? (x.stock === Infinity ? 'Inépuisable' : x.stock < 0.05 ? `Épuisé ici — repousse peu à peu (${fmt(x.repousse)} ${u}/jour)` : `Disponible ici : ${fmt(Math.round(x.stock * 10) / 10)} ${u}`) : 'Absent de ce monde'}</div>`;
     } else {
       const ins = sim.installation(meta.id);
       if (ins?.allume !== undefined) corps += `<div class="info">${ins.allume ? `🔥 Allumé — ${fmt(ins.combustible)} kg de bois (≈ ${fmt(ins.combustible / 1.5)} h)` : '❄️ Éteint'}</div>`;
       else if (ins) corps += `<div class="info">Usure ${Math.round(ins.usure)} %</div>`;
     }
     const procs = procedesPour(meta);
-    corps += procs.length ? procs.map(boutonAction).join('') : `<div class="info">Aucune action connue ici… pour l'instant.</div>`;
+    corps += procs.length ? procs.map(p => boutonAction(p, meta.site)).join('') : `<div class="info">Aucune action connue ici… pour l'instant.</div>`;
     afficherMenu(nomEl, corps, ev);
+  }
+  function ouvrirMenuTas(meta, ev) {
+    const t = sim.tas(meta.uid); if (!t) return;
+    const lignes = Object.entries(t.contenu).map(([id, q]) => `<button class="act" data-prendre="${t.uid}|${id}">Prendre ${REF.nom(id).toLowerCase()}<small>${fmt(Math.round(q * 100) / 100)} ${REF.get(id).unite}${REF.get(id).unite !== 'kg' ? ` · ${fmt(Math.round(q * sim.masseUnitaire(id) * 10) / 10)} kg` : ''}</small></button>`)
+      .concat(t.objets.map(o => `<button class="act" data-prendre="${t.uid}|${o.id}">Prendre ${REF.nom(o.id).toLowerCase()}<small>usure ${Math.round(o.usure)} %</small></button>`));
+    const deposables = Object.entries(sim.perso.inventaire).map(([id, q]) => `<button class="act" data-deposer="${t.uid}|${id}">Déposer ${REF.nom(id).toLowerCase()}<small>${fmt(Math.round(q * 100) / 100)} ${REF.get(id).unite} portés</small></button>`)
+      .concat([...new Set(sim.perso.objets.map(o => o.id))].map(id => `<button class="act" data-deposer="${t.uid}|${id}">Déposer ${REF.nom(id).toLowerCase()}</button>`));
+    afficherMenu(t.camp ? 'Réserve du camp' : 'Tas au sol',
+      `<div class="info">${t.camp ? 'Ce qui est ici sert directement aux constructions et au feu du campement.' : 'Ce qui est ici sert aux actions faites à proximité.'}</div>${lignes.join('') || '<div class="info">Vide</div>'}${deposables.length ? '<div class="info" style="margin-top:8px">Déposer ici :</div>' + deposables.join('') : ''}`, ev);
   }
   function ouvrirMenuPerso(ev) {
     const surPlace = sim.procedesConnus().filter(p => !carte.destination(p, agent, sim));
     afficherMenu(`${sim.perso.nom}`, surPlace.map(boutonAction).join(''), ev);
   }
-  function boutonAction(p) {
-    const d = sim.disponibilite(p.id);
-    return `<button class="act ${d.ok ? '' : 'ko'}" data-proc="${p.id}">${p.nom}<small>${d.ok ? `${duree(sim.dureeEffective(p.id))} · ${resume(p)}` : d.manques.map(m => m.raison).join(' · ')}</small></button>`;
+  function boutonAction(p, site = null) {
+    const d = sim.disponibilite(p.id, { site, tas: sim.monde.tas.filter(t => t.camp && sim.auCamp(p)).map(t => t.uid) });
+    return `<button class="act ${d.ok ? '' : 'ko'}" data-proc="${p.id}"${site ? ` data-site="${site}"` : ''}>${p.nom}<small>${d.ok ? `${duree(sim.dureeEffective(p.id))} · ${resume(p)}` : d.manques.map(m => m.raison).join(' · ')}</small></button>`;
   }
   function afficherMenu(titre, corps, ev) {
     const m = $('menu');
+    $('bulle').style.display = 'none';
     m.innerHTML = `<div class="titre">${titre}<span class="x" id="menuX">✕</span></div>${corps}`;
     m.style.display = 'block';
     const W = innerWidth, H = innerHeight, r = m.getBoundingClientRect();
@@ -130,11 +143,29 @@ async function demarrer() {
   function fermerMenu() { $('menu').style.display = 'none'; }
   document.addEventListener('click', e => {
     const b = e.target.closest('button[data-proc]'); if (!b) return;
-    const d = sim.disponibilite(b.dataset.proc);
-    if (!d.ok) { toast(d.manques.map(m => m.raison).join(' · ')); return; }
-    ordonner(b.dataset.proc, e.shiftKey);
+    if (b.classList.contains('ko')) { toast(b.querySelector('small')?.textContent || b.title); return; }
+    ordonner(b.dataset.proc, e.shiftKey, b.dataset.site || null);
   });
-  document.addEventListener('click', e => { const b = e.target.closest('button[data-poser]'); if (b) { sim.deposer(b.dataset.poser); rendreHUD(true); } });
+  // Tas au sol : prendre / déposer (Arok s'y rend)
+  document.addEventListener('click', e => {
+    const b = e.target.closest('button[data-prendre],button[data-deposer]'); if (!b) return;
+    const [uid, id] = (b.dataset.prendre ?? b.dataset.deposer).split('|');
+    const t = sim.tas(Number(uid)); if (!t) return;
+    const pos = t.camp ? carte.POS_RESERVE : t.position;
+    reprendreLaMain(); fermerMenu();
+    agent.ordonner({ type: b.dataset.prendre ? 'prendre' : 'deposer', tas: t.uid, id, x: pos.x, z: pos.z }, { file: e.shiftKey });
+  });
+  // Poser là où se trouve Arok (dans la réserve s'il est au campement)
+  document.addEventListener('click', e => {
+    const b = e.target.closest('button[data-poser]'); if (!b) return;
+    const pos = { x: agent.x, z: agent.z };
+    if (Math.hypot(pos.x - CAMP.x, pos.z - CAMP.z) < 9) sim.deposer(b.dataset.poser, Infinity, { camp: true });
+    else {
+      const proche = sim.monde.tas.find(t => !t.camp && t.position && Math.hypot(t.position.x - pos.x, t.position.z - pos.z) < 2.5);
+      sim.deposer(b.dataset.poser, Infinity, proche ? { tas: proche.uid } : { position: pos });
+    }
+    rendreHUD(true);
+  });
 
   // Survol : nom de l'élément sous la souris
   let survolT = 0;
@@ -143,7 +174,8 @@ async function demarrer() {
     const p = env.scene.pick(e.offsetX, e.offsetY, m => m.isPickable && m.isVisible && m.metadata && m.metadata.kind !== 'ground');
     const meta = p?.hit ? p.pickedMesh.metadata : null, bulle = $('bulle');
     if (meta && meta.kind !== 'ground') {
-      bulle.textContent = meta.kind === 'perso' ? `${sim.perso.nom} — actions sur place` : `${REF.nom(meta.id)} — cliquer pour agir`;
+      bulle.textContent = meta.kind === 'perso' ? `${sim.perso.nom} — actions sur place` : meta.kind === 'tas' ? (sim.tas(meta.uid)?.camp ? 'Réserve du camp — cliquer' : 'Tas au sol — cliquer')
+        : `${REF.nom(meta.id)}${meta.site && sim.site(meta.id, meta.site)?.stock < 0.05 ? ' (épuisé)' : ''} — cliquer pour agir`;
       bulle.style.display = 'block'; bulle.style.left = (e.clientX + 14) + 'px'; bulle.style.top = (e.clientY + 14) + 'px';
       $('c').style.cursor = 'pointer';
     } else { bulle.style.display = 'none'; $('c').style.cursor = 'default'; }
@@ -193,6 +225,9 @@ async function demarrer() {
     $('inventaire').innerHTML = Object.entries(p.inventaire).map(([id, q]) => `<li><span>${REF.nom(id)}</span><span>${fmt(q)} ${REF.get(id).unite}<button class="poser" data-poser="${id}" title="Poser au sol">⤓</button></span></li>`).join('') || '<li class="muted">Rien</li>';
     const parType = {}; for (const o of p.objets) (parType[o.id] ??= []).push(o.usure);
     $('objets').innerHTML = Object.entries(parType).map(([id, u]) => `<li><span>${REF.nom(id)}${u.length > 1 ? ' ×' + u.length : ''}</span><span class="muted">usure ${Math.round(Math.max(...u))} %</span></li>`).join('') || '<li class="muted">Aucun</li>';
+    const res = sim.reserveCamp;
+    $('reserve').innerHTML = res ? (Object.entries(res.contenu).map(([id, q]) => `<li><span>${REF.nom(id)}</span><span>${fmt(Math.round(q * 100) / 100)} ${REF.get(id).unite}</span></li>`).join('')
+      + res.objets.map(o => `<li><span>${REF.nom(o.id)}</span><span class="muted">usure ${Math.round(o.usure)} %</span></li>`).join('') || '<li class="muted">Vide</li>') : '<li class="muted">Pas encore de réserve (poser ⤓ au campement)</li>';
     $('savoirs').innerHTML = [...p.connait].map(id => `<span class="tag ${REF.type(id) === 'technique' ? 'tech' : 'con'}">${REF.nom(id)}</span>`).join('');
     $('competences').innerHTML = Object.entries(p.competences).filter(([, v]) => v > 0.05).sort((x, y) => y[1] - x[1])
       .map(([id, v]) => `<li><span>${REF.nom(id)}</span><span class="muted">${Math.floor(v)} · ${palierDe(v)}</span></li>`).join('') || '<li class="muted">Tout est à apprendre</li>';

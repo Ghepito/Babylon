@@ -13,6 +13,13 @@ Statut : **PROPOSÉ** — livré le 13/11/2026, à valider en jouant : [`jeu.htm
 - **Brouillard d'exploration** : la carte se découvre autour d'Arok.
 - Les baies des buissons diminuent quand on les cueille et repoussent.
 
+## Stocks par lieu et stockage au sol
+
+- Arok va à **l'arbre (ou au buisson…) que l'on a cliqué** ; depuis la barre d'actions ou avec l'IA, il va au plus proche qui n'est pas épuisé.
+- Un arbre dont on a prélevé les branches apparaît **dépouillé** jusqu'à ce qu'il repousse ; les baies, les tas de bois mort et les champignons diminuent site par site.
+- **⤓ dans l'inventaire** : au campement, l'objet va dans la **réserve du camp** (visible près du feu) ; ailleurs, il forme un **tas au sol**.
+- **Cliquer un tas** : prendre ce qu'il contient, ou y déposer ce que l'on porte (Arok s'y rend).
+
 ## Commandes
 
 | Geste | Effet |
@@ -42,4 +49,4 @@ L'agent est testé sans 3D (`tests/render/agent.test.mjs`) : avec la marche, l'I
 
 - La caméra peut se retrouver derrière les arbres en forêt (zoomer ou tourner).
 - Les déchets de taille et le surplus posé au sol ne sont pas encore visibles.
-- Une réserve au campement (stockage) deviendra utile avec la limite de transport.
+- L'IA n'utilise pas encore la réserve du camp de sa propre initiative.

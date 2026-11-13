@@ -33,13 +33,11 @@ export class Simulation {
     const monde = dep.filter(id => this.ref.type(id) === 'source');
 
     this.monde = {
-      sources: Object.fromEntries(monde.map(id => {
-        const a = this.ref.get(id).attributs || {};
-        const illimite = a.stock === 'illimite';
-        return [id, { stock: illimite ? Infinity : (a.stock ?? 10), max: illimite ? Infinity : (a.stock ?? 10), repousse: a.repousse_par_jour ?? 0 }];
-      })),
+      // Chaque source a un ou plusieurs « sites » (un arbre, un buisson, un tas de bois mort…) avec leur propre stock.
+      sources: Object.fromEntries(monde.map(id => [id, { sites: { principal: this.#nouveauSite(id) } }])),
+      tas: [],             // stockage au sol : {uid, camp, position, contenu:{id:q}, objets:[{uid,id,usure}]}
       installations: [],   // {uid, id, usure, combustible?, allume?}
-      sol: {},             // ce qui a été laissé au sol (déchets, surplus) : id -> quantité
+      sol: {},             // déchets et surplus perdus : id -> quantité
     };
 
     this.perso = {
@@ -91,7 +89,7 @@ export class Simulation {
   #majMonde(dt) {
     const jours = dt / 86400;
     for (const s of Object.values(this.monde.sources))
-      if (s.stock < s.max) s.stock = Math.min(s.max, s.stock + s.repousse * jours);
+      for (const x of Object.values(s.sites)) if (x.stock < x.max) x.stock = Math.min(x.max, x.stock + x.repousse * jours);
 
     for (const ins of [...this.monde.installations]) {
       const a = this.ref.get(ins.id).attributs || {};
@@ -118,6 +116,107 @@ export class Simulation {
   installationActive(id) {
     const i = this.installation(id);
     return !!i && (i.allume === undefined || i.allume);
+  }
+
+  // ---------------------------------------------------------------- sites des sources
+  #nouveauSite(src) {
+    const a = this.ref.get(src)?.attributs || {};
+    const illimite = a.stock === 'illimite';
+    const stock = illimite ? Infinity : (a.stock ?? 10);
+    return { stock, max: stock, repousse: a.repousse_par_jour ?? 0 };
+  }
+  /** Déclare les sites d'une source (appelé par la carte 3D : un site par arbre, par buisson…). */
+  definirSites(src, ids) {
+    const s = this.monde.sources[src]; if (!s) return;
+    const anciens = s.sites;
+    s.sites = Object.fromEntries(ids.map(id => [id, anciens[id] ?? this.#nouveauSite(src)]));
+  }
+  site(src, siteId) { return this.monde.sources[src]?.sites[siteId]; }
+  stockTotal(src) { const s = this.monde.sources[src]; return s ? Object.values(s.sites).reduce((a, x) => a + x.stock, 0) : 0; }
+  /** Un site de la source avec assez de stock (le mieux pourvu), ou null. */
+  choisirSite(src, besoin = 0.0001) {
+    const s = this.monde.sources[src]; if (!s) return null;
+    let best = null, bs = -1;
+    for (const [id, x] of Object.entries(s.sites)) if (x.stock + 1e-9 >= besoin && x.stock > bs) { best = id; bs = x.stock; }
+    return best;
+  }
+
+  // ---------------------------------------------------------------- stockage au sol
+  tas(uid) { return this.monde.tas.find(t => t.uid === uid); }
+  get reserveCamp() { return this.monde.tas.find(t => t.camp); }
+  /** Pose au sol (dans un tas existant, la réserve du camp ou un nouveau tas). Renvoie le tas. */
+  deposer(id, q = Infinity, { tas = null, camp = false, position = null } = {}) {
+    const t = this.ref.type(id);
+    let pile = tas != null ? this.tas(tas) : (camp ? this.reserveCamp : null);
+    const creer = () => { const n = { uid: ++this.uid, camp, position, contenu: {}, objets: [] }; this.monde.tas.push(n); return n; };
+    if (t === 'ressource') {
+      const n = Math.min(q, this.perso.inventaire[id] ?? 0); if (n <= 1e-9) return null;
+      pile ??= creer();
+      this.#retirer(id, n); pile.contenu[id] = (pile.contenu[id] ?? 0) + n;
+      this.noter('depot', `${this.perso.nom} pose ${fmt(Math.round(n * 100) / 100)} ${this.#unite(id)} de ${this.ref.nom(id).toLowerCase()}${pile.camp ? ' dans la réserve du camp' : ' au sol'}.`, { ressource: id, tas: pile.uid });
+      return pile;
+    }
+    if (t === 'objet') {
+      const o = this.perso.objets.filter(x => x.id === id).sort((a, b) => b.usure - a.usure)[0]; if (!o) return null;
+      pile ??= creer();
+      this.perso.objets.splice(this.perso.objets.indexOf(o), 1); pile.objets.push(o);
+      this.noter('depot', `${this.perso.nom} pose ${this.ref.nom(id).toLowerCase()}${pile.camp ? ' dans la réserve du camp' : ' au sol'}.`, { objet: id, tas: pile.uid });
+      return pile;
+    }
+    return null;
+  }
+  /** Reprend d'un tas (dans la limite de ce que l'on peut porter). Renvoie la quantité prise. */
+  prendre(tasUid, id, q = Infinity) {
+    const pile = this.tas(tasUid); if (!pile) return 0;
+    let pris = 0;
+    if (this.ref.type(id) === 'ressource') {
+      const m = this.masseUnitaire(id), place = m > 0 ? Math.max(0, (this.capacite - this.charge) / m) : Infinity;
+      pris = Math.min(q, pile.contenu[id] ?? 0, place);
+      if (pris <= 1e-9) { this.noter('surcharge', `Trop chargé pour prendre ${this.ref.nom(id).toLowerCase()}.`); return 0; }
+      pile.contenu[id] -= pris; if (pile.contenu[id] < 1e-9) delete pile.contenu[id];
+      this.perso.inventaire[id] = (this.perso.inventaire[id] ?? 0) + pris;
+    } else {
+      const o = pile.objets.find(x => x.id === id); if (!o) return 0;
+      if (this.perso.objets.length >= REGLES.transport.outilsMax) { this.noter('surcharge', 'Mains pleines.'); return 0; }
+      pile.objets.splice(pile.objets.indexOf(o), 1); this.perso.objets.push(o); pris = 1;
+    }
+    this.noter('prise', `${this.perso.nom} prend ${fmt(Math.round(pris * 100) / 100)} ${this.#unite(id)} de ${this.ref.nom(id).toLowerCase()}.`, { tas: tasUid });
+    this.#nettoyerTas();
+    return pris;
+  }
+  #nettoyerTas() { this.monde.tas = this.monde.tas.filter(t => t.camp || Object.keys(t.contenu).length || t.objets.length); }
+
+  /** Un procédé se déroule-t-il au campement ? (il touche une installation) */
+  auCamp(proc) {
+    return proc.requiert.some(id => this.ref.type(id) === 'installation') || proc.entretient.length > 0
+      || proc.produit.some(s => this.ref.type(s.id) === 'installation');
+  }
+  /** Tas à portée pour un procédé : ceux indiqués, sinon la réserve du camp pour une action au campement. */
+  #tasPour(proc, opts) {
+    if (opts.tas) return opts.tas.map(u => this.tas(u)).filter(Boolean);
+    return this.auCamp(proc) && this.reserveCamp ? [this.reserveCamp] : [];
+  }
+  /** Quantité accessible : ce que l'on porte + ce qui est dans les tas à portée. */
+  #accessible(id, piles) {
+    let q = this.quantite(id);
+    for (const p of piles) q += this.ref.type(id) === 'objet' ? p.objets.filter(o => o.id === id).length : (p.contenu[id] ?? 0);
+    return q;
+  }
+  #retirerAccessible(id, q, piles) {
+    const t = this.ref.type(id);
+    if (t === 'ressource') {
+      const inv = Math.min(q, this.perso.inventaire[id] ?? 0);
+      if (inv > 0) this.#retirer(id, inv);
+      let reste = q - inv;
+      for (const p of piles) { if (reste <= 1e-9) break; const n = Math.min(reste, p.contenu[id] ?? 0); if (n > 0) { p.contenu[id] -= n; if (p.contenu[id] < 1e-9) delete p.contenu[id]; reste -= n; } }
+    } else if (t === 'objet') {
+      for (let i = 0; i < q; i++) {
+        const k = this.perso.objets.findIndex(o => o.id === id);
+        if (k >= 0) { this.perso.objets.splice(k, 1); continue; }
+        for (const p of piles) { const j = p.objets.findIndex(o => o.id === id); if (j >= 0) { p.objets.splice(j, 1); break; } }
+      }
+    }
+    this.#nettoyerTas();
   }
 
   // ---------------------------------------------------------------- besoins
@@ -189,23 +288,6 @@ export class Simulation {
   }
   get capacite() { return REGLES.transport.capaciteKg; }
 
-  /** Poser au sol une quantité d'une ressource portée (ou un objet). */
-  deposer(id, q = Infinity) {
-    const t = this.ref.type(id);
-    if (t === 'ressource') {
-      const n = Math.min(q, this.perso.inventaire[id] ?? 0); if (n <= 0) return 0;
-      this.#retirer(id, n); this.monde.sol[id] = (this.monde.sol[id] ?? 0) + n;
-      this.noter('depot', `${this.perso.nom} pose ${fmt(Math.round(n * 100) / 100)} ${this.#unite(id)} de ${this.ref.nom(id).toLowerCase()}.`, { ressource: id });
-      return n;
-    }
-    if (t === 'objet') {
-      const o = this.perso.objets.filter(x => x.id === id).sort((a, b) => b.usure - a.usure)[0]; if (!o) return 0;
-      this.perso.objets.splice(this.perso.objets.indexOf(o), 1); this.monde.sol[id] = (this.monde.sol[id] ?? 0) + 1;
-      this.noter('depot', `${this.perso.nom} pose ${this.ref.nom(id).toLowerCase()}.`, { objet: id });
-      return 1;
-    }
-    return 0;
-  }
 
   // ---------------------------------------------------------------- actions
   /** Procédés que le personnage connaît (sa technique est connue). */
@@ -217,7 +299,7 @@ export class Simulation {
    * Peut-on exécuter ce procédé maintenant ? Renvoie les manques détaillés (pour l'interface et l'IA).
    * @returns {{ok:boolean, manques:{id:string, raison:string, quantite?:number}[]}}
    */
-  disponibilite(procId) {
+  disponibilite(procId, opts = {}) {
     const p = this.ref.procedes.get(procId);
     if (!p) return { ok: false, manques: [{ id: procId, raison: 'procédé inconnu' }] };
     const manques = [];
@@ -226,17 +308,24 @@ export class Simulation {
     for (const id of p.requiert) {
       const t = this.ref.type(id);
       if (t === 'source') {
-        const s = this.monde.sources[id];
+        const s = this.monde.sources[id], besoin = Math.max(0.0001, this.#prelevement(p));
         if (!s) manques.push({ id, raison: `pas de ${this.ref.nom(id).toLowerCase()} dans ce monde` });
-        else if (s.stock <= 0.0001 || (this.#prelevement(p) > s.stock + 1e-9)) manques.push({ id, raison: `${this.ref.nom(id)} épuisé(e) pour l'instant` });
+        else if (opts.site != null) {
+          const x = s.sites[opts.site];
+          if (!x || x.stock + 1e-9 < besoin) manques.push({ id, site: opts.site, raison: `${this.ref.nom(id)} épuisé(e) ici pour l'instant` });
+        }
+        else if (!this.choisirSite(id, besoin)) manques.push({ id, raison: `${this.ref.nom(id)} épuisé(e) partout pour l'instant` });
       } else if (t === 'installation') {
         if (!this.installationActive(id)) manques.push({ id, raison: this.installation(id) ? `${this.ref.nom(id)} éteint` : `il faut un(e) ${this.ref.nom(id).toLowerCase()}` });
       } else if (!this.possede(id)) manques.push({ id, raison: `il faut savoir : ${this.ref.nom(id)}` });
     }
-    for (const c of p.consomme)
-      if (!this.possede(c.id, c.q)) manques.push({ id: c.id, quantite: c.q, raison: `il faut ${fmt(c.q)} ${this.#unite(c.id)} de ${this.ref.nom(c.id).toLowerCase()} (${fmt(this.quantite(c.id))})` });
+    const piles = this.#tasPour(p, opts);
+    for (const c of p.consomme) {
+      const dispo = this.#accessible(c.id, piles);
+      if (dispo + 1e-9 < c.q) manques.push({ id: c.id, quantite: c.q, raison: `il faut ${fmt(c.q)} ${this.#unite(c.id)} de ${this.ref.nom(c.id).toLowerCase()} (${fmt(Math.round(dispo * 100) / 100)})` });
+    }
     for (const g of p.utilise)
-      if (!g.some(id => this.possede(id))) manques.push({ id: g[0], alternatives: g, raison: `il faut : ${g.map(id => this.ref.nom(id).toLowerCase()).join(' ou ')}` });
+      if (!g.some(id => this.#accessible(id, piles) >= 1 - 1e-9)) manques.push({ id: g[0], alternatives: g, raison: `il faut : ${g.map(id => this.ref.nom(id).toLowerCase()).join(' ou ')}` });
     const apport = p.produit.filter(s => this.ref.type(s.id) === 'ressource' || this.ref.type(s.id) === 'objet')
       .reduce((a, s) => a + s.q * this.masseUnitaire(s.id), 0)
       - p.consomme.reduce((a, c) => a + c.q * this.masseUnitaire(c.id), 0);
@@ -270,12 +359,15 @@ export class Simulation {
   }
 
   /** Lance un procédé (ou le met en file si une action est en cours). */
-  lancer(procId, { file = false } = {}) {
-    const d = this.disponibilite(procId);
+  lancer(procId, { file = false, site = null, tas = null } = {}) {
+    const d = this.disponibilite(procId, { site, tas });
     if (!d.ok) return d;
     if (this.perso.action && file) { this.perso.file.push(procId); return { ok: true, enFile: true, manques: [] }; }
     if (this.perso.action) this.annuler();
-    this.perso.action = { procede: procId, ecoule: 0, duree: this.dureeEffective(procId), satisfait: {} };
+    const p = this.ref.procedes.get(procId);
+    const src = p.requiert.find(id => this.ref.type(id) === 'source');
+    const siteChoisi = src ? (site ?? this.choisirSite(src, Math.max(0.0001, this.#prelevement(p)))) : null;
+    this.perso.action = { procede: procId, ecoule: 0, duree: this.dureeEffective(procId), satisfait: {}, site: siteChoisi, tas: tas ?? null };
     this.noter('action_debut', `${this.ref.nom(procId)}…`, { procede: procId });
     return d;
   }
@@ -309,27 +401,37 @@ export class Simulation {
 
   #terminer(proc) {
     const p = this.perso;
+    const action = p.action;
     p.action = null;
+    const piles = this.#tasPour(proc, { tas: action.tas });
     // Les conditions ont pu changer pendant l'action (ex. feu éteint) : on vérifie les entrées
-    for (const c of proc.consomme) if (!this.possede(c.id, c.q)) {
+    for (const c of proc.consomme) if (this.#accessible(c.id, piles) + 1e-9 < c.q) {
       this.noter('action_echec', `${proc.nom} : il manque ${this.ref.nom(c.id).toLowerCase()}.`, { procede: proc.id }); return;
     }
-    // Consommation
-    for (const c of proc.consomme) this.#retirer(c.id, c.q);
+    // Consommation (ce que l'on porte d'abord, puis les tas à portée)
+    for (const c of proc.consomme) this.#retirerAccessible(c.id, c.q, piles);
     // Usure des outils utilisés (le premier disponible de chaque groupe)
-    const utilises = proc.utilise.map(g => g.find(id => this.possede(id))).filter(Boolean);
+    const utilises = proc.utilise.map(g => g.find(id => this.#accessible(id, piles) >= 1)).filter(Boolean);
     for (const id of utilises) {
       const u = proc.degrade[id];
       if (u && this.ref.type(id) === 'objet') {
-        const o = this.perso.objets.filter(x => x.id === id).sort((a, b) => b.usure - a.usure)[0];
+        const porteur = this.perso.objets.some(x => x.id === id) ? this.perso.objets : piles.find(t => t.objets.some(x => x.id === id))?.objets;
+        if (!porteur) continue;
+        const o = porteur.filter(x => x.id === id).sort((a, b) => b.usure - a.usure)[0];
         o.usure += u;
-        if (o.usure >= 100) { this.perso.objets.splice(this.perso.objets.indexOf(o), 1); this.noter('objet_casse', `${this.ref.nom(id)} est hors d'usage.`, { objet: id }); }
+        if (o.usure >= 100) { porteur.splice(porteur.indexOf(o), 1); this.noter('objet_casse', `${this.ref.nom(id)} est hors d'usage.`, { objet: id }); }
       }
     }
     for (const [id, u] of Object.entries(proc.degrade)) if (this.ref.type(id) === 'installation' && this.installation(id)) this.installation(id).usure += u;
-    // Prélèvement dans la source
+    // Prélèvement sur le site de la source
     const src = proc.requiert.find(id => this.ref.type(id) === 'source');
-    if (src) this.monde.sources[src].stock = Math.max(0, this.monde.sources[src].stock - this.#prelevement(proc));
+    if (src) {
+      const x = this.site(src, action.site) ?? this.site(src, this.choisirSite(src));
+      if (x) {
+        x.stock = Math.max(0, x.stock - this.#prelevement(proc));
+        if (x.stock <= 1e-6 && x.max !== Infinity) this.noter('site_epuise', `Ce(tte) ${this.ref.nom(src).toLowerCase()} est épuisé(e) pour l'instant.`, { source: src, site: action.site });
+      }
+    }
     // Production
     const produits = [];
     for (const s of proc.produit) {
@@ -458,7 +560,7 @@ export class Simulation {
   exporterEtat() {
     return JSON.parse(JSON.stringify({
       version: 1, options: this.options, temps: this.temps, vitesse: this.vitesse, uid: this.uid, alea: this.alea.etat,
-      monde: { ...this.monde, sources: Object.fromEntries(Object.entries(this.monde.sources).map(([k, s]) => [k, { ...s, stock: s.stock === Infinity ? 'illimite' : s.stock, max: s.max === Infinity ? 'illimite' : s.max }])) },
+      monde: { ...this.monde, sources: Object.fromEntries(Object.entries(this.monde.sources).map(([k, s]) => [k, { sites: Object.fromEntries(Object.entries(s.sites).map(([i, x]) => [i, { ...x, stock: x.stock === Infinity ? 'illimite' : x.stock, max: x.max === Infinity ? 'illimite' : x.max }])) }])) },
       perso: { ...this.perso, connait: [...this.perso.connait] },
     }));
   }
@@ -468,7 +570,8 @@ export class Simulation {
     sim.journal = [];
     sim.temps = etat.temps; sim.vitesse = etat.vitesse; sim.uid = etat.uid; sim.alea.etat = etat.alea;
     sim.monde = structuredClone(etat.monde);
-    for (const s of Object.values(sim.monde.sources)) { if (s.stock === 'illimite') s.stock = Infinity; if (s.max === 'illimite') s.max = Infinity; }
+    for (const s of Object.values(sim.monde.sources)) for (const x of Object.values(s.sites)) { if (x.stock === 'illimite') x.stock = Infinity; if (x.max === 'illimite') x.max = Infinity; }
+    sim.monde.tas ??= [];
     sim.perso = { ...structuredClone(etat.perso), connait: new Set(etat.perso.connait) };
     return sim;
   }

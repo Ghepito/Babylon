@@ -17,6 +17,7 @@ function rigFactice() {
 const LIEUX = { 'src.lac': { x: 18, z: 2 }, 'src.buisson_baies': { x: -9, z: -16 }, 'src.sous_bois': { x: -30, z: 6 }, 'src.bois_mort': { x: -15, z: 4 },
   'src.arbre': { x: -14, z: 0 }, 'src.prairie': { x: -2, z: -30 }, 'src.riviere_galets': { x: 16, z: 6 }, 'src.affleurement_silex': { x: -20, z: -30 } };
 const carte = {
+  POS_RESERVE: { x: CAMP.x + 3, z: CAMP.z - 3 },
   destination(proc) {
     const s = proc.requiert.find(id => REF.type(id) === 'source');
     if (s) return { ...LIEUX[s], rayon: 1, regarder: LIEUX[s] };

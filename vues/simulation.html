@@ -179,7 +179,7 @@ function rendre(force) {
   $('savoirs').innerHTML = [...p.connait].map(id => `<span class="tag ${REF.type(id) === 'technique' ? 'tech' : 'con'}">${REF.nom(id)}</span>`).join('');
   $('competences').innerHTML = Object.entries(p.competences).filter(([, v]) => v > 0.05).sort((a, b) => b[1] - a[1])
     .map(([id, v]) => `<li><span>${REF.nom(id)}</span><span class="muted">${Math.floor(v)} · ${palierDe(v)}</span></li>`).join('') || '<li class="muted">Tout est à apprendre.</li>';
-  $('sources').innerHTML = Object.entries(sim.monde.sources).map(([id, s]) => `<li><span>${REF.nom(id)}</span><span class="muted">${s.stock === Infinity ? '∞' : fmt(s.stock)}</span></li>`).join('');
+  $('sources').innerHTML = Object.keys(sim.monde.sources).map(id => { const t = sim.stockTotal(id); return `<li><span>${REF.nom(id)}</span><span class="muted">${t === Infinity ? '∞' : fmt(t)}</span></li>`; }).join('');
 
   // journal
   const tout = $('tout').checked, j = $('journal');
