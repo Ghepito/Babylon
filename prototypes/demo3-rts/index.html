@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Babylon — Démo 3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --gold:#e8c27a; --gold2:#b8893f; --ink:#f3ead8; --panel:rgba(22,17,12,.82); --line:rgba(232,194,122,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:#0d0b09;font-family:Inter,system-ui,sans-serif;color:var(--ink);user-select:none}
+  #c{position:fixed;inset:0;width:100%;height:100%;outline:none;touch-action:none;display:block}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;backdrop-filter:blur(6px);box-shadow:0 8px 30px rgba(0,0,0,.45)}
+  #top{position:fixed;top:10px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:18px;padding:8px 18px;z-index:5;white-space:nowrap}
+  #top .era{font-family:Cinzel,serif;font-size:12px;letter-spacing:.12em;color:var(--ink);opacity:.8;padding-right:14px;margin-left:-6px;border-right:1px solid var(--line)}
+  #top .title{font-family:Cinzel,serif;font-weight:800;letter-spacing:.18em;color:var(--gold);font-size:18px;padding-right:14px;border-right:1px solid var(--line)}
+  .res{display:flex;align-items:center;gap:6px;font-weight:600;font-variant-numeric:tabular-nums;font-size:15px}
+  .res .ico{font-size:17px}
+  .res small{opacity:.65;font-weight:400;font-size:11px}
+  .fuel{display:inline-block;width:70px;height:9px;border-radius:5px;background:rgba(255,255,255,.12);overflow:hidden;border:1px solid rgba(255,255,255,.15)}
+  .fuel>i{display:block;height:100%;width:60%;background:#f2c14e;transition:width .3s}
+  #fuelWrap.blink{animation:blink 1s infinite}
+  @keyframes blink{50%{opacity:.35}}
+  .fireWarn{position:fixed;transform:translate(-50%,-100%);z-index:4;pointer-events:none;padding:5px 10px;border-radius:8px;background:rgba(60,25,10,.85);border:1px solid #e8a23a;color:#ffd9a0;font:600 13px Inter,sans-serif;text-align:center;white-space:nowrap;animation:pulse 1s infinite}
+  .fireWarn.out{background:rgba(20,30,50,.88);border-color:#8fb6ff;color:#d8e6ff}
+  .fireWarn small{font-weight:400;opacity:.8}
+  @keyframes pulse{50%{transform:translate(-50%,-112%)}}
+  #sel{position:fixed;left:12px;bottom:12px;width:340px;min-height:96px;padding:12px 14px;z-index:5}
+  #sel h3{margin:0 0 4px;font-family:Cinzel,serif;color:var(--gold);font-size:16px;letter-spacing:.06em}
+  #sel .sub{font-size:13px;opacity:.85;line-height:1.45}
+  #sel .hint{font-size:12px;opacity:.6;margin-top:6px}
+  .btn{margin-top:10px;display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid var(--gold2);background:linear-gradient(#5a4122,#3b2a16);color:var(--ink);font:600 13px Inter,sans-serif;cursor:pointer}
+  .btn:hover{filter:brightness(1.2)}
+  .btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+  .bar{height:6px;border-radius:3px;background:rgba(255,255,255,.12);margin-top:8px;overflow:hidden}
+  .bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold2),var(--gold))}
+  #tod{position:fixed;right:12px;bottom:12px;padding:10px 14px;z-index:5;width:250px;font-size:12px}
+  #tod label{display:flex;justify-content:space-between;opacity:.85;margin-bottom:4px}
+  #tod input{width:100%;accent-color:var(--gold)}
+  #tod .row{display:flex;gap:6px;margin-top:8px}
+  #tod .row .btn{margin:0;padding:5px 8px;font-size:12px;flex:1;justify-content:center}
+  #help{position:fixed;right:12px;top:10px;width:300px;padding:12px 14px;z-index:6;font-size:12.5px;line-height:1.55}
+  #help h4{margin:0 0 6px;font-family:Cinzel,serif;color:var(--gold);font-size:14px}
+  #help kbd{display:inline-block;min-width:18px;padding:0 5px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;font:600 11px Inter,sans-serif;text-align:center;background:rgba(255,255,255,.06)}
+  #help .x{position:absolute;top:6px;right:10px;cursor:pointer;opacity:.6}
+  #help.hidden{display:none}
+  #helpBtn{position:fixed;right:12px;top:10px;z-index:5;padding:6px 10px;cursor:pointer;font-size:13px}
+  #box{position:fixed;border:1px solid #9be37a;background:rgba(155,227,122,.12);pointer-events:none;display:none;z-index:4}
+  #toast{position:fixed;top:64px;left:50%;transform:translateX(-50%);padding:8px 14px;z-index:6;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none}
+  #loading{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(#2a2015,#0d0b09);z-index:20;transition:opacity .8s}
+  #loading h1{font-family:Cinzel,serif;font-weight:800;letter-spacing:.35em;color:var(--gold);font-size:56px;margin:0}
+  #loading p{opacity:.7;letter-spacing:.1em}
+  #err{color:#ff9a8a;max-width:520px;text-align:center;font-size:14px}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="loading"><h1>BABYLON</h1><p id="loadmsg">Préparation du monde…</p><div id="err"></div></div>
+
+<div id="top" class="panel">
+  <span class="title">BABYLON</span><span class="era" id="era">Âge de pierre</span>
+  <span class="res"><span class="ico">🍖</span><span id="rFood">0</span></span>
+  <span class="res"><span class="ico">🪵</span><span id="rWood">0</span></span>
+    <span class="res"><span class="ico">🪨</span><span id="rStone">0</span></span>
+  <span class="res" id="fuelWrap" title="Feu de camp"><span class="ico">🔥</span><span class="fuel"><i id="fuelBar"></i></span></span>
+  <span class="res"><span class="ico">👥</span><span id="rPop">0</span><small>/</small><span id="rPopMax">10</span></span>
+</div>
+
+<div id="sel" class="panel"></div>
+
+<div id="tod" class="panel">
+  <label><span>☀️ Heure du jour</span><span id="todVal">15 h</span></label>
+  <input id="todSlider" type="range" min="0" max="100" value="62">
+  <div class="row">
+    <button class="btn" id="btnOrbit" title="Touche O">🎥 Orbite</button>
+    <button class="btn" id="btnHome" title="Touche Espace">🔥 Campement</button>
+  </div>
+</div>
+
+<div id="help" class="panel">
+  <span class="x" id="helpClose">✕</span>
+  <h4>Commandes</h4>
+  <div><kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> / flèches / bord d'écran : déplacer la vue</div>
+  <div>Clic gauche maintenu + glisser : tourner librement (orbite)</div>
+  <div><kbd>A</kbd> <kbd>E</kbd> : pivoter · molette : zoomer</div>
+  <div>Clic gauche : sélectionner · <kbd>Maj</kbd> + glisser : sélection multiple</div>
+  <div>Clic droit : déplacer / récolter (arbre, baies, silex)</div>
+  <div>Clic droit sur le <b>feu</b> : l'entretenir avec le bois de la réserve</div>
+  <div>Double-clic : zoom et suivi d'un personnage ou du campement</div>
+  <div><kbd>O</kbd> orbite cinéma · <kbd>Espace</kbd> campement · <kbd>Échap</kbd> libérer la caméra</div>
+  <div><kbd>V</kbd> nouveau membre (campement sélectionné) · <kbd>H</kbd> aide</div>
+</div>
+<div id="helpBtn" class="panel hidden" style="display:none">❔ Aide</div>
+
+<div id="box"></div>
+<div id="toast" class="panel"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/babylonjs@9.35.0/babylon.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/babylonjs-materials@9.35.0/babylon.skyMaterial.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/babylonjs-materials@9.35.0/babylon.waterMaterial.min.js"></script>
+<script>
+"use strict";
+(function(){
+const $ = id => document.getElementById(id);
+function fail(msg){ $('loadmsg').textContent = "Impossible de démarrer"; $('err').textContent = msg; }
+if (typeof BABYLON === 'undefined'){ fail("La bibliothèque Babylon.js n'a pas pu être chargée (connexion internet nécessaire)."); return; }
+
+/* ============================================================
+   OUTILS : bruit procédural
+   ============================================================ */
+function hash(i, j){
+  let h = Math.imul(i, 374761393) + Math.imul(j, 668265263) | 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967295;
+}
+const sm = t => t*t*(3-2*t);
+function vnoise(x, y, p){ // p = période (0 = non périodique)
+  let i = Math.floor(x), j = Math.floor(y); const fx = x-i, fy = y-j;
+  const w = (a)=> p ? ((a % p) + p) % p : a;
+  const a = hash(w(i),w(j)), b = hash(w(i+1),w(j)), c = hash(w(i),w(j+1)), d = hash(w(i+1),w(j+1));
+  const u = sm(fx), v = sm(fy);
+  return (a + (b-a)*u) + ((c + (d-c)*u) - (a + (b-a)*u))*v;
+}
+function fbm(x, y, oct=5, p=0){
+  let s=0, amp=0.5, f=1, n=0;
+  for(let o=0;o<oct;o++){ s += amp*vnoise(x*f, y*f, p? p*f : 0); n+=amp; amp*=0.5; f*=2; }
+  return s/n;
+}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const smooth=(e0,e1,x)=>{ const t=clamp((x-e0)/(e1-e0),0,1); return t*t*(3-2*t); };
+const lerp=(a,b,t)=>a+(b-a)*t;
+
+/* ============================================================
+   MONDE : relief
+   ============================================================ */
+const MAP = 420, HALF = MAP/2;
+const TC_POS = { x:-30, z:-20 };
+const LAKE = { x:42, z:34, r:38 };
+function rawHeight(x, z){
+  let h = 2.2 + (fbm(x*0.012+11, z*0.012-7, 5)-0.5)*9;
+  h += (fbm(x*0.045, z*0.045, 3)-0.5)*1.2;
+  // collines en bordure de carte
+  const e = Math.max(Math.abs(x), Math.abs(z));
+  h += smooth(120, 205, e) * (18 + fbm(x*0.02, z*0.02, 4)*30);
+  // zone plate autour du centre-ville
+  const dTC = Math.hypot(x-TC_POS.x, z-TC_POS.z);
+  h = lerp(2.4, h, smooth(18, 55, dTC));
+  h = Math.max(h, 1.6);
+  // lac (forme irrégulière)
+  const ang = Math.atan2(z-LAKE.z, x-LAKE.x);
+  const rr = LAKE.r * (0.85 + 0.3*vnoise(Math.cos(ang)*2+5, Math.sin(ang)*2+5));
+  const dL = Math.hypot(x-LAKE.x, z-LAKE.z);
+  const lk = 1 - smooth(rr*0.55, rr*1.08, dL);
+  h = lerp(h, -4.5, lk);
+  return h;
+}
+const height = rawHeight;
+
+/* ============================================================
+   MOTEUR / SCÈNE
+   ============================================================ */
+const canvas = $('c');
+const engine = new BABYLON.Engine(canvas, true, { stencil:true, preserveDrawingBuffer:false, antialias:true }, true);
+engine.setHardwareScalingLevel(1/Math.min(window.devicePixelRatio||1, 1.5));
+const scene = new BABYLON.Scene(engine);
+scene.clearColor = new BABYLON.Color4(0.55,0.7,0.85,1);
+scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
+scene.fogDensity = 0.0032;
+scene.fogColor = new BABYLON.Color3(0.72,0.8,0.88);
+scene.skipPointerMovePicking = true;
+
+/* Caméra RTS (orbitale) */
+const camera = new BABYLON.ArcRotateCamera("cam", -Math.PI/2 - 0.55, 0.92, 62, new BABYLON.Vector3(TC_POS.x, 2.4, TC_POS.z), scene);
+camera.minZ = 0.2; camera.maxZ = 4000;
+camera.lowerRadiusLimit = 3.5; camera.upperRadiusLimit = 170;
+camera.lowerBetaLimit = 0.22; camera.upperBetaLimit = 1.38;
+camera.wheelDeltaPercentage = 0.012;
+camera.attachControl(canvas, true);
+camera.inputs.removeByType("ArcRotateCameraPointersInput");
+camera.inputs.removeByType("ArcRotateCameraKeyboardMoveInput");
+camera.fov = 0.8;
+
+/* Lumières */
+const sun = new BABYLON.DirectionalLight("sun", new BABYLON.Vector3(-0.5,-1,0.4), scene);
+sun.position = new BABYLON.Vector3(100,200,-80);
+const hemi = new BABYLON.HemisphericLight("hemi", new BABYLON.Vector3(0,1,0), scene);
+hemi.intensity = 0.55;
+
+/* Ombres */
+let shadowGen;
+if (engine.webGLVersion >= 2){
+  shadowGen = new BABYLON.CascadedShadowGenerator(2048, sun);
+  shadowGen.numCascades = 4;
+  shadowGen.lambda = 0.85;
+  shadowGen.shadowMaxZ = 260;
+  shadowGen.stabilizeCascades = true;
+  shadowGen.cascadeBlendPercentage = 0.08;
+  shadowGen.usePercentageCloserFiltering = true;
+  shadowGen.filteringQuality = BABYLON.ShadowGenerator.QUALITY_MEDIUM;
+  shadowGen.darkness = 0.25;
+  shadowGen.bias = 0.004; shadowGen.normalBias = 0.02;
+} else {
+  shadowGen = new BABYLON.ShadowGenerator(2048, sun);
+  shadowGen.usePercentageCloserFiltering = true;
+  shadowGen.darkness = 0.3;
+}
+const addCaster = m => shadowGen.addShadowCaster(m, false);
+
+/* ============================================================
+   TEXTURES PROCÉDURALES
+   ============================================================ */
+function makeTex(name, size, fn, opts={}){
+  const t = new BABYLON.DynamicTexture(name, {width:size, height:size}, scene, true);
+  const ctx = t.getContext(); const img = ctx.createImageData(size, size); const d = img.data;
+  for(let y=0;y<size;y++) for(let x=0;x<size;x++){
+    const c = fn(x, y, size); const k = (y*size+x)*4;
+    d[k]=c[0]; d[k+1]=c[1]; d[k+2]=c[2]; d[k+3]= c.length>3 ? c[3] : 255;
+  }
+  ctx.putImageData(img,0,0); t.update(opts.invertY ?? true);
+  t.wrapU = t.wrapV = opts.clamp ? BABYLON.Texture.CLAMP_ADDRESSMODE : BABYLON.Texture.WRAP_ADDRESSMODE;
+  if(opts.alpha) t.hasAlpha = true;
+  return t;
+}
+// grain du sol
+const detailTex = makeTex("detail", 256, (x,y,s)=>{
+  const v = 0.82 + 0.18*fbm(x/s*16, y/s*16, 4, 16);
+  const g = Math.round(v*255); return [g,g,g];
+});
+// normales de l'eau (périodique)
+const waterBump = (()=>{
+  const S=256, H=new Float32Array(S*S);
+  for(let y=0;y<S;y++) for(let x=0;x<S;x++) H[y*S+x] = fbm(x/S*8, y/S*8, 4, 8);
+  return makeTex("waterBump", S, (x,y)=>{
+    const l=H[y*S+((x-1+S)%S)], r=H[y*S+((x+1)%S)], u=H[((y-1+S)%S)*S+x], d=H[((y+1)%S)*S+x];
+    let nx=(l-r)*6, ny=(u-d)*6, nz=1; const L=Math.hypot(nx,ny,nz); nx/=L; ny/=L; nz/=L;
+    return [ (nx*0.5+0.5)*255, (ny*0.5+0.5)*255, (nz*0.5+0.5)*255 ];
+  });
+})();
+// nuages (périodique)
+const cloudTex = makeTex("clouds", 512, (x,y,s)=>{
+  const v = fbm(x/s*6, y/s*6, 6, 6);
+  const a = smooth(0.5, 0.78, v);
+  const sh = 235 - 40*smooth(0.6,0.9,v);
+  return [sh, sh, Math.min(255, sh+10), a*235];
+}, {alpha:true});
+const cloudFade = makeTex("cloudFade", 128, (x,y,s)=>{
+  const d = Math.hypot(x/s-0.5, y/s-0.5)*2; const a = 1-smooth(0.35,1.0,d);
+  return [a*255,a*255,a*255,255];
+}, {clamp:true});
+// fumée
+const smokeTex = makeTex("smoke", 64, (x,y,s)=>{
+  const d = Math.hypot(x/s-0.5, y/s-0.5)*2; const a = Math.pow(1-clamp(d,0,1), 2);
+  return [255,255,255,a*255];
+}, {alpha:true, clamp:true});
+
+/* ============================================================
+   CIEL
+   ============================================================ */
+const skyMat = new BABYLON.SkyMaterial("skyMat", scene);
+skyMat.backFaceCulling = false;
+skyMat.useSunPosition = true;
+skyMat.turbidity = 4; skyMat.rayleigh = 1.6; skyMat.luminance = 1.0;
+skyMat.mieCoefficient = 0.004; skyMat.mieDirectionalG = 0.85;
+skyMat.fogEnabled = false;
+const skybox = BABYLON.MeshBuilder.CreateBox("skybox", {size:3000}, scene);
+skybox.material = skyMat; skybox.infiniteDistance = true; skybox.isPickable = false;
+
+const cloudMat = new BABYLON.StandardMaterial("cloudMat", scene);
+cloudMat.diffuseTexture = cloudTex; cloudMat.useAlphaFromDiffuseTexture = true;
+cloudTex.uScale = cloudTex.vScale = 3;
+cloudMat.opacityTexture = cloudFade;
+cloudMat.emissiveColor = new BABYLON.Color3(1,1,1); cloudMat.disableLighting = true;
+cloudMat.backFaceCulling = false; cloudMat.fogEnabled = false;
+const clouds = BABYLON.MeshBuilder.CreateGround("clouds", {width:2400, height:2400}, scene);
+clouds.position.y = 170; clouds.material = cloudMat; clouds.isPickable = false;
+
+/* ============================================================
+   TERRAIN
+   ============================================================ */
+const terrain = BABYLON.MeshBuilder.CreateGround("terrain", {width:MAP, height:MAP, subdivisions:240, updatable:true}, scene);
+{
+  const pos = terrain.getVerticesData(BABYLON.VertexBuffer.PositionKind);
+  const idx = terrain.getIndices();
+  for(let i=0;i<pos.length;i+=3) pos[i+1] = height(pos[i], pos[i+2]);
+  const nrm = []; BABYLON.VertexData.ComputeNormals(pos, idx, nrm);
+  const col = new Float32Array(pos.length/3*4);
+  for(let i=0,v=0;i<pos.length;i+=3,v+=4){
+    const x=pos[i], y=pos[i+1], z=pos[i+2], ny=nrm[i+1];
+    const n1 = fbm(x*0.03+3, z*0.03+9, 3), n2 = fbm(x*0.15, z*0.15, 2);
+    // herbe (variations)
+    let r = lerp(0.28, 0.40, n1), g = lerp(0.47, 0.58, n1), b = lerp(0.16, 0.20, n2);
+    // herbe sèche / prairie
+    const dry = smooth(0.55, 0.75, fbm(x*0.02-40, z*0.02+13, 3));
+    r = lerp(r, 0.55, dry*0.6); g = lerp(g, 0.55, dry*0.4); b = lerp(b, 0.24, dry*0.4);
+    // place en terre battue autour du centre-ville
+    const dTC = Math.hypot(x-TC_POS.x, z-TC_POS.z);
+    const dirt = (1-smooth(10, 17, dTC + (n2-0.5)*6));
+    r = lerp(r, 0.52, dirt); g = lerp(g, 0.42, dirt); b = lerp(b, 0.28, dirt);
+    // sable de berge, fond du lac
+    const sand = 1 - smooth(0.7, 1.5, y);
+    r = lerp(r, 0.76, sand); g = lerp(g, 0.68, sand); b = lerp(b, 0.48, sand);
+    const deep = 1 - smooth(-3, 0, y);
+    r = lerp(r, 0.35, deep); g = lerp(g, 0.36, deep); b = lerp(b, 0.30, deep);
+    // roche sur pentes et sommets
+    const rock = Math.max(1 - smooth(0.72, 0.86, ny), smooth(16, 26, y));
+    const rv = lerp(0.42, 0.55, n2);
+    r = lerp(r, rv, rock); g = lerp(g, rv*0.97, rock); b = lerp(b, rv*0.9, rock);
+    col[v]=r; col[v+1]=g; col[v+2]=b; col[v+3]=1;
+  }
+  terrain.updateVerticesData(BABYLON.VertexBuffer.PositionKind, pos);
+  terrain.updateVerticesData(BABYLON.VertexBuffer.NormalKind, nrm);
+  terrain.setVerticesData(BABYLON.VertexBuffer.ColorKind, col);
+  terrain.refreshBoundingInfo();
+}
+const terrainMat = new BABYLON.StandardMaterial("terrainMat", scene);
+terrainMat.diffuseTexture = detailTex; detailTex.uScale = detailTex.vScale = 70;
+terrainMat.specularColor = new BABYLON.Color3(0.03,0.03,0.03);
+terrain.material = terrainMat;
+terrain.receiveShadows = true;
+terrain.metadata = { kind:'ground' };
+
+/* ============================================================
+   EAU
+   ============================================================ */
+const water = BABYLON.MeshBuilder.CreateGround("water", {width:LAKE.r*3.4, height:LAKE.r*3.4, subdivisions:48}, scene);
+water.position.set(LAKE.x, 0, LAKE.z);
+water.isPickable = false;
+const waterMat = new BABYLON.WaterMaterial("waterMat", scene, new BABYLON.Vector2(512,512));
+waterMat.bumpTexture = waterBump;
+waterMat.windForce = -6;
+waterMat.waveHeight = 0.12;
+waterMat.waveLength = 0.08;
+waterMat.waveSpeed = 40;
+waterMat.bumpHeight = 0.35;
+waterMat.windDirection = new BABYLON.Vector2(1, 0.6);
+waterMat.waterColor = new BABYLON.Color3(0.12, 0.4, 0.48);
+waterMat.colorBlendFactor = 0.22;
+waterMat.waterColor2 = new BABYLON.Color3(0.1, 0.35, 0.3);
+waterMat.colorBlendFactor2 = 0.15;
+waterBump.uScale = waterBump.vScale = 1;
+water.material = waterMat;
+waterMat.addToRenderList(skybox);
+waterMat.addToRenderList(clouds);
+waterMat.addToRenderList(terrain);
+
+/* ============================================================
+   MATÉRIAUX & AIDES DE MODÉLISATION
+   ============================================================ */
+const vcMat = new BABYLON.StandardMaterial("vc", scene);
+vcMat.specularColor = new BABYLON.Color3(0.04,0.04,0.04);
+const C = (r,g,b)=> new BABYLON.Color3(r,g,b);
+function paint(mesh, color, jitter=0, flat=true){
+  if(flat) mesh.convertToFlatShadedMesh();
+  if(jitter){
+    const p = mesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
+    // déplacement cohérent : même déformation pour sommets confondus
+    for(let i=0;i<p.length;i+=3){
+      const k = Math.round(p[i]*50)*7 + Math.round(p[i+1]*50)*13 + Math.round(p[i+2]*50)*29;
+      p[i]   += (hash(k,1)-0.5)*jitter; p[i+1] += (hash(k,2)-0.5)*jitter; p[i+2] += (hash(k,3)-0.5)*jitter;
+    }
+    mesh.updateVerticesData(BABYLON.VertexBuffer.PositionKind, p);
+    const n=[]; BABYLON.VertexData.ComputeNormals(p, mesh.getIndices(), n);
+    mesh.updateVerticesData(BABYLON.VertexBuffer.NormalKind, n);
+  }
+  const n = mesh.getTotalVertices(), c = new Float32Array(n*4);
+  for(let i=0;i<n;i++){ const s = 1 + (jitter? (hash(i,77)-0.5)*0.12 : 0);
+    c[i*4]=color.r*s; c[i*4+1]=color.g*s; c[i*4+2]=color.b*s; c[i*4+3]=1; }
+  mesh.setVerticesData(BABYLON.VertexBuffer.ColorKind, c);
+  return mesh;
+}
+const MB = BABYLON.MeshBuilder;
+function part(mesh, color, x=0,y=0,z=0, opts={}){
+  mesh.position.set(x,y,z);
+  if(opts.ry) mesh.rotation.y = opts.ry;
+  if(opts.rx) mesh.rotation.x = opts.rx;
+  if(opts.rz) mesh.rotation.z = opts.rz;
+  if(opts.sc) mesh.scaling.set(opts.sc[0],opts.sc[1],opts.sc[2]);
+  mesh.bakeCurrentTransformIntoVertices();
+  return paint(mesh, color, opts.jitter||0, opts.flat!==false);
+}
+function merge(name, parts){
+  const m = BABYLON.Mesh.MergeMeshes(parts, true, true);
+  m.name = name; m.material = vcMat; return m;
+}
+
+/* ============================================================
+   ARBRES (instances)
+   ============================================================ */
+function makePine(){
+  const parts = [ part(MB.CreateCylinder("t",{height:2.2, diameterTop:0.32, diameterBottom:0.5, tessellation:7}), C(0.36,0.24,0.15), 0,1.1,0) ];
+  const greens = [C(0.13,0.32,0.18), C(0.15,0.36,0.2), C(0.18,0.4,0.22)];
+  for(let i=0;i<4;i++){
+    const h = 2.6 - i*0.35, d = 4.2 - i*0.9;
+    parts.push(part(MB.CreateCylinder("c",{height:h, diameterTop:0, diameterBottom:d, tessellation:8}), greens[i%3], 0, 2.1 + i*1.25 + h/2, 0, {jitter:0.35, ry:i*0.4}));
+  }
+  return merge("pine", parts);
+}
+function makeOak(){
+  const parts = [ part(MB.CreateCylinder("t",{height:3, diameterTop:0.4, diameterBottom:0.7, tessellation:7}), C(0.38,0.26,0.16), 0,1.5,0) ];
+  const blobs = [[0,4.3,0,2.2],[1.2,3.8,0.4,1.5],[-1.1,3.9,-0.3,1.6],[0.2,5.3,0.6,1.4],[-0.4,3.6,1.1,1.3],[0.5,3.7,-1.1,1.3]];
+  const g = [C(0.24,0.42,0.16), C(0.28,0.46,0.18), C(0.21,0.38,0.14)];
+  blobs.forEach((b,i)=> parts.push(part(MB.CreateIcoSphere("b",{radius:b[3], subdivisions:1}), g[i%3], b[0],b[1],b[2], {jitter:0.45})));
+  return merge("oak", parts);
+}
+const treeSrc = { pine: makePine(), oak: makeOak() };
+Object.values(treeSrc).forEach(m=>{ addCaster(m); m.receiveShadows = true; waterMat.addToRenderList(m); });
+
+/* ============================================================
+   ENTITÉS DE JEU
+   ============================================================ */
+const resources = [];   // {type, amount, x, z, r, meshes, label}
+const buildings = [];   // {type, x, z, r, root, ...}
+const units = [];
+const stock = { food:200, wood:200, gold:100, stone:200 };
+const POP_MAX = 10;
+const RES_INFO = {
+  wood:{ name:"Bois", ico:"🪵", verb:"Abat un arbre", carry:C(0.5,0.34,0.18), rate:0.9 },
+  food:{ name:"Nourriture", ico:"🍖", verb:"Cueille des baies", carry:C(0.7,0.15,0.25), rate:0.8 },
+  gold:{ name:"Or", ico:"🪙", verb:"Extrait de l'or", carry:C(0.95,0.75,0.2), rate:0.6 },
+  stone:{ name:"Pierre", ico:"🪨", verb:"Taille du silex", carry:C(0.62,0.62,0.6), rate:0.6 },
+};
+function tagMeshes(meshes, kind, ref){ meshes.forEach(m=>{ m.metadata = { kind, ref }; }); }
+
+/* --- Placement des arbres --- */
+function isFree(x, z, r){
+  if (height(x,z) < 1.3) return false;
+  if (Math.hypot(x-TC_POS.x, z-TC_POS.z) < 20 + r) return false;
+  for (const b of buildings) if (Math.hypot(x-b.x, z-b.z) < b.r + r + 1) return false;
+  for (const s of resources) if (Math.hypot(x-s.x, z-s.z) < s.r + r + 0.6) return false;
+  return true;
+}
+let treeCount = 0;
+function addTree(x, z, kind){
+  const y = height(x,z);
+  if (y > 22) return;
+  const src = treeSrc[kind];
+  const m = !src.metadata ? src : src.createInstance(kind+treeCount);
+  if (m === src) src.metadata = {};
+  const s = 0.8 + hash(Math.floor(x*10), Math.floor(z*10))*0.55;
+  m.position.set(x, y-0.15, z);
+  m.rotation.y = hash(Math.floor(x*7), Math.floor(z*3))*Math.PI*2;
+  m.scaling.setAll(s);
+  m.rotation.z = (hash(Math.floor(x), Math.floor(z*9))-0.5)*0.08;
+  const res = { type:'wood', amount:100, max:100, x, z, r:0.7*s, meshes:[m], label:"Arbre" };
+  tagMeshes([m], 'res', res);
+  resources.push(res); treeCount++;
+}
+function forest(cx, cz, radius, count, oakRatio){
+  let placed=0, tries=0;
+  while(placed<count && tries<count*12){
+    tries++;
+    const a = Math.random()*Math.PI*2, d = Math.sqrt(Math.random())*radius;
+    const x = cx + Math.cos(a)*d, z = cz + Math.sin(a)*d;
+    if (Math.abs(x)>HALF-8 || Math.abs(z)>HALF-8) continue;
+    if (!isFree(x,z,1.6)) continue;
+    addTree(x, z, Math.random()<oakRatio ? 'oak':'pine'); placed++;
+  }
+}
+
+/* --- Campement préhistorique --- */
+function poleBetween(a, b, d, color){
+  const dir = b.subtract(a); const len = dir.length(); dir.normalize();
+  const m = MB.CreateCylinder("pole",{height:len, diameter:d, tessellation:5});
+  m.position = a.add(b).scale(0.5);
+  m.rotationQuaternion = new BABYLON.Quaternion();
+  BABYLON.Quaternion.FromUnitVectorsToRef(BABYLON.Vector3.Up(), dir, m.rotationQuaternion);
+  m.bakeCurrentTransformIntoVertices();
+  return paint(m, color, 0.02);
+}
+const FIRE_LOCAL = { x:-2.2, z:-3.6 };
+function makeCamp(){
+  const hide=C(0.74,0.59,0.4), hideDark=C(0.6,0.45,0.29), pole=C(0.36,0.25,0.15), stoneC=C(0.5,0.49,0.46), ash=C(0.16,0.14,0.12), red=C(0.58,0.24,0.14);
+  const P=[]; const V = (x,y,z)=>new BABYLON.Vector3(x,y,z);
+  // grand tipi en peaux
+  const T = {x:1.6, z:2.2};
+  P.push(part(MB.CreateCylinder("tp",{height:6.4, diameterTop:0.45, diameterBottom:7, tessellation:10}), hide, T.x,3.2,T.z, {jitter:0.12}));
+  P.push(part(MB.CreateCylinder("band",{height:0.45, diameterTop:4.55, diameterBottom:4.95, tessellation:10}), red, T.x,2.35,T.z));
+  P.push(part(MB.CreateCylinder("band2",{height:0.25, diameterTop:3.2, diameterBottom:3.45, tessellation:10}), hideDark, T.x,3.6,T.z));
+  for(let i=0;i<8;i++){ const a=i*0.785+0.2;
+    P.push(poleBetween(V(T.x+Math.cos(a)*3.35, 0, T.z+Math.sin(a)*3.35), V(T.x-Math.cos(a)*0.5, 7.9, T.z-Math.sin(a)*0.5), 0.11, pole)); }
+  P.push(part(MB.CreateCylinder("door",{height:2.3, diameterTop:0, diameterBottom:1.7, tessellation:3}), C(0.1,0.08,0.06), T.x,1.15,T.z-3.05, {sc:[1,1,0.12], ry:Math.PI/6}));
+  // petit tipi
+  P.push(part(MB.CreateCylinder("tp2",{height:4.2, diameterTop:0.3, diameterBottom:4.2, tessellation:9}), hideDark, -3.6,2.1,3.0, {jitter:0.1}));
+  for(let i=0;i<6;i++){ const a=i*1.05;
+    P.push(poleBetween(V(-3.6+Math.cos(a)*2.0, 0, 3.0+Math.sin(a)*2.0), V(-3.6-Math.cos(a)*0.35, 5.1, 3.0-Math.sin(a)*0.35), 0.08, pole)); }
+  // foyer
+  const F = FIRE_LOCAL;
+  P.push(part(MB.CreateCylinder("ash",{height:0.06, diameter:1.6, tessellation:12}), ash, F.x,0.04,F.z));
+  for(let i=0;i<10;i++){ const a=i*0.628;
+    P.push(part(MB.CreateIcoSphere("st",{radius:0.26, subdivisions:1}), stoneC, F.x+Math.cos(a)*0.95, 0.12, F.z+Math.sin(a)*0.95, {jitter:0.12, sc:[1,0.7,1]})); }
+  for(let i=0;i<4;i++){ const a=i*1.57+0.4;
+    P.push(poleBetween(V(F.x+Math.cos(a)*0.65, 0.05, F.z+Math.sin(a)*0.65), V(F.x, 0.65, F.z), 0.13, C(0.3,0.2,0.12))); }
+  // séchoir à peaux
+  const D = {x:4.4, z:-3.2};
+  [-1.1,1.1].forEach(dx=>P.push(part(MB.CreateCylinder("post",{height:2.1, diameter:0.12, tessellation:5}), pole, D.x+dx,1.05,D.z)));
+  P.push(part(MB.CreateCylinder("bar",{height:2.6, diameter:0.09, tessellation:5}), pole, D.x,2.05,D.z, {rz:Math.PI/2}));
+  P.push(part(MB.CreateBox("hide1",{width:0.9, height:1.2, depth:0.04}), C(0.66,0.5,0.32), D.x-0.5,1.45,D.z, {jitter:0.06}));
+  P.push(part(MB.CreateBox("hide2",{width:0.8, height:1.0, depth:0.04}), C(0.55,0.42,0.3), D.x+0.55,1.55,D.z+0.03, {jitter:0.06}));
+  // tas de bois
+  for(let i=0;i<7;i++){ const row = i<4?0:1, k = row? i-4 : i;
+    P.push(part(MB.CreateCylinder("log",{height:1.8, diameter:0.26, tessellation:7}), C(0.42,0.3,0.18), -5.2, 0.15+row*0.24, -1.2+k*0.27+row*0.13, {rx:Math.PI/2, jitter:0.03})); }
+  // crâne de mammouth décoratif (défenses)
+  P.push(part(MB.CreateIcoSphere("skull",{radius:0.45, subdivisions:1}), C(0.85,0.82,0.74), 5.0,0.35,2.6, {jitter:0.12, sc:[1,0.8,1.2]}));
+  [-1,1].forEach(s=>P.push(part(MB.CreateCylinder("tusk",{height:1.5, diameterTop:0.03, diameterBottom:0.16, tessellation:8}), C(0.92,0.9,0.82), 5.0+s*0.32,0.75,1.9, {rx:-1.0, rz:s*0.25, flat:false})));
+  return merge("camp", P);
+}
+function makeHut(){
+  const thatch=C(0.56,0.46,0.28), pole=C(0.36,0.25,0.15);
+  const P=[];
+  P.push(part(MB.CreateSphere("dome",{diameter:4.4, segments:8, slice:0.5}), thatch, 0,0,0, {jitter:0.3, sc:[1,0.85,1]}));
+  P.push(part(MB.CreateSphere("dome2",{diameter:3.4, segments:6, slice:0.5}), C(0.5,0.4,0.24), 0,0.35,0, {jitter:0.35, sc:[1,0.85,1]}));
+  const V=(x,y,z)=>new BABYLON.Vector3(x,y,z);
+  for(let i=0;i<5;i++){ const a=i*1.26; P.push(poleBetween(V(Math.cos(a)*0.4,1.4,Math.sin(a)*0.4), V(Math.cos(a)*0.7,2.6,Math.sin(a)*0.7), 0.07, pole)); }
+  P.push(part(MB.CreateBox("door",{width:0.9, height:1.2, depth:0.5}), C(0.1,0.08,0.06), 0,0.6,-1.95));
+  return merge("hut", P);
+}
+function placeBuilding(type, mesh, x, z, r, ry=0){
+  const y = height(x,z);
+  mesh.position.set(x, y-0.05, z); mesh.rotation.y = ry;
+  mesh.receiveShadows = true; addCaster(mesh); waterMat.addToRenderList(mesh);
+  const b = { type, x, z, r, mesh, queue:0, progress:0, rally:null };
+  tagMeshes([mesh], 'bld', b);
+  buildings.push(b); return b;
+}
+const townCenter = placeBuilding('tc', makeCamp(), TC_POS.x, TC_POS.z, 6.5, 0);
+townCenter.label = "Campement de la tribu";
+const hutSrc = makeHut();
+[[-48,-8,0.6],[-44,-36,-0.4],[-14,-38,0.2]].forEach(([x,z,ry],i)=>{
+  const h = i===0 ? hutSrc : hutSrc.createInstance("hut"+i);
+  const b = placeBuilding('house', h, x, z, 2.6, ry); b.label="Hutte";
+});
+
+/* feu de camp : flammes, fumée, lumière */
+let fireSys, smokeSys;
+const FIRE_POS = new BABYLON.Vector3(TC_POS.x+FIRE_LOCAL.x, height(TC_POS.x,TC_POS.z)+0.25, TC_POS.z+FIRE_LOCAL.z);
+const fireTex = makeTex("fire", 64, (x,y,s)=>{
+  const d = Math.hypot(x/s-0.5, y/s-0.5)*2; const a = Math.pow(1-clamp(d,0,1), 1.6);
+  return [255, 200*a+40, 80*a, a*255];
+}, {alpha:true, clamp:true});
+{
+  fireSys = new BABYLON.ParticleSystem("fire", 260, scene);
+  fireSys.particleTexture = fireTex; fireSys.emitter = FIRE_POS.clone();
+  fireSys.minEmitBox = new BABYLON.Vector3(-0.3,0,-0.3); fireSys.maxEmitBox = new BABYLON.Vector3(0.3,0.1,0.3);
+  fireSys.color1 = new BABYLON.Color4(1,0.65,0.2,1); fireSys.color2 = new BABYLON.Color4(1,0.4,0.1,1); fireSys.colorDead = new BABYLON.Color4(0.3,0.05,0,0);
+  fireSys.minSize = 0.25; fireSys.maxSize = 0.6; fireSys.minLifeTime = 0.3; fireSys.maxLifeTime = 0.8; fireSys.emitRate = 160;
+  fireSys.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+  fireSys.direction1 = new BABYLON.Vector3(-0.15,1,-0.15); fireSys.direction2 = new BABYLON.Vector3(0.15,1,0.15);
+  fireSys.minEmitPower = 0.8; fireSys.maxEmitPower = 1.6; fireSys.updateSpeed = 0.016;
+  fireSys.addSizeGradient(0, 0.5); fireSys.addSizeGradient(1, 0.1);
+  fireSys.start();
+  smokeSys = new BABYLON.ParticleSystem("smoke", 220, scene);
+  smokeSys.particleTexture = smokeTex; smokeSys.emitter = FIRE_POS.add(new BABYLON.Vector3(0,1.0,0));
+  smokeSys.minEmitBox = new BABYLON.Vector3(-0.2,0,-0.2); smokeSys.maxEmitBox = new BABYLON.Vector3(0.2,0,0.2);
+  smokeSys.color1 = new BABYLON.Color4(0.75,0.75,0.75,0.3); smokeSys.color2 = new BABYLON.Color4(0.6,0.6,0.6,0.22);
+  smokeSys.colorDead = new BABYLON.Color4(0.6,0.6,0.6,0);
+  smokeSys.minSize = 0.5; smokeSys.maxSize = 1.1; smokeSys.minLifeTime = 3; smokeSys.maxLifeTime = 6;
+  smokeSys.emitRate = 16; smokeSys.blendMode = BABYLON.ParticleSystem.BLENDMODE_STANDARD;
+  smokeSys.gravity = new BABYLON.Vector3(0.25, 0.5, 0.1);
+  smokeSys.direction1 = new BABYLON.Vector3(-0.1, 0.8, -0.1); smokeSys.direction2 = new BABYLON.Vector3(0.2, 1.2, 0.2);
+  smokeSys.minEmitPower = 0.3; smokeSys.maxEmitPower = 0.7; smokeSys.updateSpeed = 0.016;
+  smokeSys.addSizeGradient(0, 0.5); smokeSys.addSizeGradient(1, 3.2);
+  smokeSys.start();
+}
+const fireLight = new BABYLON.PointLight("fireLight", FIRE_POS.add(new BABYLON.Vector3(0,0.8,0)), scene);
+fireLight.diffuse = new BABYLON.Color3(1,0.55,0.2); fireLight.specular = new BABYLON.Color3(0,0,0);
+fireLight.intensity = 0.8; fireLight.range = 14;
+
+/* ============================================================
+   FEU DE CAMP : combustible, entretien
+   1 bois = 2 unités de combustible · le feu brûle en continu
+   ============================================================ */
+const FIRE = { fuel:60, max:100, burn:0.3, out:false, warned:false, label:"Feu de camp" };
+const FUEL_PER_WOOD = 2;
+const fireHit = MB.CreateCylinder("fireHit",{height:1.4, diameter:2.6}, scene);
+fireHit.position = FIRE_POS.add(new BABYLON.Vector3(0,0.45,0));
+fireHit.visibility = 0.001; fireHit.metadata = { kind:'fire', ref:FIRE };
+const WOODPILE = { x: TC_POS.x - 6.5, z: TC_POS.z - 0.8 };   // tas de bois du campement
+function keepers(){ return units.filter(u=>u.job==='fire'); }
+function orderToPile(u){ u.state='toPile'; u.target=townCenter; u.tx=WOODPILE.x; u.tz=WOODPILE.z; }
+function orderToFire(u){ u.state='toFire'; u.target=townCenter; const p=approachPoint(u.x,u.z,FIRE_POS.x,FIRE_POS.z,1.6); u.tx=p.x; u.tz=p.z; }
+function orderFeed(u){
+  u.job = 'fire';
+  if (u.carry>=1 && u.carryType==='wood') orderToFire(u);
+  else { if (u.carry>0 && u.carryType){ stock[u.carryType]+=Math.floor(u.carry); } u.carry=0; u.carryType=null; orderToPile(u); }
+}
+function feedFire(u){
+  const wood = Math.floor(u.carry);
+  const room = Math.floor((FIRE.max - FIRE.fuel)/FUEL_PER_WOOD);
+  const used = Math.min(wood, Math.max(0,room));
+  FIRE.fuel = Math.min(FIRE.max, FIRE.fuel + used*FUEL_PER_WOOD);
+  if (wood-used>0) stock.wood += wood-used;   // le surplus retourne au tas de bois
+  u.carry = 0; u.carryType = null;
+  if (used>0){
+    floatText(FIRE_POS.x, FIRE_POS.z, "+"+used+" 🪵 → 🔥");
+    if (FIRE.out){ FIRE.out=false; toast("🔥 Le feu reprend ! La tribu se réchauffe."); }
+    FIRE.warned = false;
+  }
+  u.state='feeding'; u.feedT=1.1;
+}
+function assignKeeper(){
+  const free = units.filter(u=>u.job!=='fire');
+  if (!free.length){ toast("Tout le monde garde déjà le feu !"); return; }
+  free.sort((a,b)=> (a.state==='idle'?0:1)-(b.state==='idle'?0:1) || Math.hypot(a.x-FIRE_POS.x,a.z-FIRE_POS.z)-Math.hypot(b.x-FIRE_POS.x,b.z-FIRE_POS.z));
+  const u = free[0]; orderFeed(u);
+  toast(`${u.name} devient ${u.female?'gardienne':'gardien'} du feu`);
+}
+const fireWarn = document.createElement('div');
+fireWarn.className = 'fireWarn'; fireWarn.style.display='none'; document.body.appendChild(fireWarn);
+function updateFire(dt){
+  if (!FIRE.out){
+    FIRE.fuel = Math.max(0, FIRE.fuel - FIRE.burn*dt);
+    if (FIRE.fuel <= 0){ FIRE.out = true; toast("🔥 Le feu s'est éteint ! La tribu a froid : récolte ralentie, plus de naissances."); }
+    else if (FIRE.fuel/FIRE.max < 0.3 && !FIRE.warned){ FIRE.warned = true; toast("⚠️ Le feu faiblit : il manque du bois !"); }
+  }
+}
+function updateFireVisual(t){
+  const f = FIRE.fuel/FIRE.max;
+  const k = FIRE.out ? 0 : smooth(0, 0.6, f);
+  fireSys.emitRate = FIRE.out ? 3 : 20 + 180*k;
+  fireSys.minSize = 0.12 + 0.18*k; fireSys.maxSize = 0.22 + 0.48*k;
+  fireSys.minEmitPower = 0.3 + 0.6*k; fireSys.maxEmitPower = 0.5 + 1.2*k;
+  if (FIRE.out){ fireSys.color1.copyFromFloats(0.7,0.18,0.05,1); fireSys.color2.copyFromFloats(0.45,0.08,0.02,1); fireSys.maxLifeTime = 0.35; }
+  else { fireSys.color1.copyFromFloats(1,0.45+0.25*k,0.15,1); fireSys.color2.copyFromFloats(1,0.3+0.12*k,0.08,1); fireSys.maxLifeTime = 0.45+0.4*k; }
+  // fumée : un feu qui manque de bois fume davantage, une fumée plus grise
+  const low = FIRE.out ? 1 : 1 - smooth(0.15, 0.4, f);
+  smokeSys.emitRate = 14 + 22*low;
+  const g = 0.75 - 0.35*low;
+  smokeSys.color1.copyFromFloats(g,g,g,0.3+0.15*low); smokeSys.color2.copyFromFloats(g*0.85,g*0.85,g*0.85,0.22+0.12*low);
+  fireLight.intensity = FIRE.out ? 0.04 : (0.2 + 0.65*k) * (1 + Math.sin(t*13)*0.12 + Math.sin(t*29)*0.08);
+  // alerte visuelle au-dessus du feu
+  const warn = FIRE.out || f < 0.3;
+  if (warn){
+    const W=engine.getRenderWidth(), H=engine.getRenderHeight(), kk = canvas.clientWidth/W;
+    const p = BABYLON.Vector3.Project(FIRE_POS.add(new BABYLON.Vector3(0,3.2,0)), BABYLON.Matrix.Identity(), scene.getTransformMatrix(), camera.viewport.toGlobal(W,H));
+    fireWarn.style.display = p.z>0 && p.z<1 ? 'block' : 'none';
+    fireWarn.style.left = (p.x*kk)+'px'; fireWarn.style.top = (p.y*kk)+'px';
+    fireWarn.innerHTML = FIRE.out ? '❄️ Feu éteint<br><small>apportez du bois 🪵</small>' : '🪵 Le feu faiblit !';
+    fireWarn.classList.toggle('out', FIRE.out);
+  } else fireWarn.style.display = 'none';
+  // jauge du bandeau
+  const bar = $('fuelBar'); bar.style.width = Math.round(f*100)+'%';
+  bar.style.background = f<0.3 ? '#e2553b' : f<0.6 ? '#e8a23a' : '#f2c14e';
+  $('fuelWrap').classList.toggle('blink', warn);
+}
+
+/* ============================================================
+   BROUILLARD D'EXPLORATION
+   R = zone déjà explorée · G = zone actuellement vue
+   ============================================================ */
+const FOG_N = 160, FOG_CELL = MAP/FOG_N;
+const fogData = new Uint8Array(FOG_N*FOG_N*4);
+const fogExplored = new Float32Array(FOG_N*FOG_N);
+const fogVis = new Float32Array(FOG_N*FOG_N);
+const fogTex = BABYLON.RawTexture.CreateRGBATexture(fogData, FOG_N, FOG_N, scene, false, false, BABYLON.Texture.BILINEAR_SAMPLINGMODE);
+fogTex.wrapU = fogTex.wrapV = BABYLON.Texture.CLAMP_ADDRESSMODE;
+const VISION = { unit:16, camp:26 };
+function updateFog(){
+  fogVis.fill(0);
+  const viewers = units.map(u=>[u.x,u.z,VISION.unit]); viewers.push([townCenter.x, townCenter.z, VISION.camp]);
+  for (const [x,z,r] of viewers){
+    const i0 = Math.max(0, Math.floor((x-r+HALF)/FOG_CELL)), i1 = Math.min(FOG_N-1, Math.ceil((x+r+HALF)/FOG_CELL));
+    const j0 = Math.max(0, Math.floor((z-r+HALF)/FOG_CELL)), j1 = Math.min(FOG_N-1, Math.ceil((z+r+HALF)/FOG_CELL));
+    for (let j=j0;j<=j1;j++) for (let i=i0;i<=i1;i++){
+      const cx = (i+0.5)*FOG_CELL-HALF, cz = (j+0.5)*FOG_CELL-HALF;
+      const v = 1 - smooth(r*0.65, r, Math.hypot(cx-x, cz-z));
+      const k = j*FOG_N+i; if (v > fogVis[k]) fogVis[k] = v;
+    }
+  }
+  for (let k=0;k<fogVis.length;k++){
+    const e = Math.max(fogExplored[k], Math.min(1, fogVis[k]*1.8));
+    fogExplored[k] = e;
+    fogData[k*4] = e*255; fogData[k*4+1] = fogVis[k]*255; fogData[k*4+2] = 0; fogData[k*4+3] = 255;
+  }
+  fogTex.update(fogData);
+}
+function isExplored(x,z){
+  const i = Math.floor((x+HALF)/FOG_CELL), j = Math.floor((z+HALF)/FOG_CELL);
+  if (i<0||j<0||i>=FOG_N||j>=FOG_N) return false; return fogExplored[j*FOG_N+i] > 0.35;
+}
+BABYLON.Effect.ShadersStore["fogOfWarFragmentShader"] = `
+precision highp float;
+varying vec2 vUV;
+uniform sampler2D textureSampler;
+uniform sampler2D depthSampler;
+uniform sampler2D fogSampler;
+uniform mat4 invProj;
+uniform mat4 invView;
+uniform float mapSize;
+uniform float time;
+float h2(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
+float n2(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f);
+  return mix(mix(h2(i),h2(i+vec2(1,0)),f.x), mix(h2(i+vec2(0,1)),h2(i+vec2(1,1)),f.x), f.y); }
+void main(){
+  vec4 col = texture2D(textureSampler, vUV);
+  float z = texture2D(depthSampler, vUV).r;
+  if (z <= 0.0 || z > 1100.0) { gl_FragColor = col; return; }
+  vec4 v = invProj * vec4(vUV*2.0-1.0, 0.5, 1.0); v.xyz /= v.w;
+  vec3 pv = v.xyz / v.z * z;
+  vec3 w = (invView * vec4(pv, 1.0)).xyz;
+  // bords irréguliers et légèrement mouvants
+  vec2 wob = vec2(n2(w.xz*0.15 + time*0.05), n2(w.xz*0.15 - time*0.04 + 17.0)) - 0.5;
+  vec2 fuv = (w.xz + wob*3.0 + mapSize*0.5) / mapSize;
+  vec4 f = texture2D(fogSampler, fuv);
+  float explored = smoothstep(0.15, 0.75, f.r);
+  float visible  = smoothstep(0.1, 0.9, f.g);
+  float lum = dot(col.rgb, vec3(0.3, 0.59, 0.11));
+  vec3 memory = mix(vec3(lum), col.rgb, 0.35) * 0.48;
+  vec3 c = mix(memory, col.rgb, visible);
+  float cloud = n2(w.xz*0.05 + time*0.02)*0.5 + n2(w.xz*0.13)*0.5;
+  vec3 dark = vec3(0.025, 0.024, 0.03) + vec3(0.03, 0.028, 0.03)*cloud;
+  gl_FragColor = vec4(mix(dark, c, explored), col.a);
+}`;
+const depthRenderer = scene.enableDepthRenderer(camera, false, true, BABYLON.Texture.NEAREST_SAMPLINGMODE, true);
+depthRenderer.clearColor = new BABYLON.Color4(0,0,0,1);
+
+/* --- Ressources : baies, or, pierre --- */
+function makeBush(){
+  const P=[ part(MB.CreateIcoSphere("b",{radius:1.1, subdivisions:1}), C(0.2,0.4,0.15), 0,0.7,0, {jitter:0.35}) ];
+  for(let i=0;i<9;i++){ const a=i*2.3, h=0.5+hash(i,3)*0.7;
+    P.push(part(MB.CreateIcoSphere("r",{radius:0.14, subdivisions:1}), C(0.75,0.08,0.2), Math.cos(a)*0.95, h, Math.sin(a)*0.95)); }
+  return merge("bush", P);
+}
+function makeMine(kind){
+  const P=[]; const base = kind==='gold' ? C(0.5,0.47,0.42) : C(0.58,0.58,0.56);
+  for(let i=0;i<7;i++){
+    const a=i*0.9, d= i===0?0:1.2+hash(i,5)*0.8, r=0.8+hash(i,8)*0.7;
+    P.push(part(MB.CreateIcoSphere("rk",{radius:r, subdivisions:1}), base, Math.cos(a)*d, r*0.45, Math.sin(a)*d, {jitter:0.5}));
+  }
+  if(kind==='gold') for(let i=0;i<10;i++){ const a=i*1.7, d=0.6+hash(i,9)*1.6;
+    P.push(part(MB.CreateIcoSphere("g",{radius:0.28+hash(i,4)*0.2, subdivisions:0}), C(1,0.78,0.2), Math.cos(a)*d, 0.6+hash(i,2)*0.9, Math.sin(a)*d, {jitter:0.1})); }
+  else for(let i=0;i<6;i++){ const a=i*1.3, d=0.8+hash(i,6)*1.2;
+    P.push(part(MB.CreateBox("bl",{size:0.55}), C(0.7,0.7,0.68), Math.cos(a)*d, 0.3, Math.sin(a)*d, {ry:a, jitter:0.08})); }
+  return merge(kind+"Mine", P);
+}
+const goldMat = new BABYLON.StandardMaterial("goldMat", scene);
+goldMat.specularColor = new BABYLON.Color3(0.6,0.5,0.2); goldMat.specularPower = 32;
+function addRes(type, mesh, x, z, r, amount, label){
+  mesh.position.set(x, height(x,z)-0.1, z);
+  mesh.rotation.y = Math.random()*6.28;
+  mesh.receiveShadows = true; addCaster(mesh); waterMat.addToRenderList(mesh);
+  if(type==='gold') mesh.material = goldMat;
+  const res = { type, amount, max:amount, x, z, r, meshes:[mesh], label };
+  tagMeshes([mesh], 'res', res); resources.push(res); return res;
+}
+const bushSrc = makeBush();
+[[-14,-6],[-11,-9],[-15,-11],[-10,-4],[-12,-14],[-8,-8]].forEach(([dx,dz],i)=>{
+  const m = i===0 ? bushSrc : bushSrc.createInstance("bush"+i);
+  addRes('food', m, dx, dz, 1.2, 125, "Buisson de baies");
+});
+addRes('stone', makeMine('stone'), -6, -54, 2.6, 400, "Affleurement de silex");
+addRes('stone', makeMine('stone'), -62, -42, 2.6, 400, "Affleurement de silex");
+[[ -60,-30],[-56,-28],[-64,-26],[-30,10],[-26,13],[-34,12]].forEach(([x,z],i)=>{ const m = bushSrc.createInstance("bushB"+i); addRes('food', m, x, z, 1.2, 125, "Buisson de baies"); });
+
+/* --- Forêts --- */
+forest(-68, -5, 22, 70, 0.35);       // forêt proche du centre-ville
+forest(-30, 30, 18, 45, 0.6);
+forest(10, -40, 12, 25, 0.5);
+forest(-90, -70, 30, 80, 0.3);
+forest(100, 40, 35, 90, 0.4);
+forest(-20, 90, 40, 110, 0.5);
+forest(80, -100, 35, 80, 0.3);
+forest(-120, 60, 35, 80, 0.4);
+// arbres isolés
+for(let i=0;i<160;i++){
+  const x=(Math.random()-0.5)*(MAP-30), z=(Math.random()-0.5)*(MAP-30);
+  if (fbm(x*0.02+50, z*0.02, 3) > 0.48 && isFree(x,z,2)) addTree(x,z, Math.random()<0.5?'oak':'pine');
+}
+
+/* --- Herbes & fleurs (thin instances, décor) --- */
+{
+  const blades = [];
+  for(let i=0;i<7;i++){
+    const a = i*2.4, d = 0.08 + hash(i,11)*0.14, h = 0.35 + hash(i,12)*0.4;
+    const gc = C(lerp(0.26,0.38,hash(i,13)), lerp(0.46,0.58,hash(i,14)), 0.16);
+    blades.push(part(MB.CreateCylinder("bl",{height:h, diameterTop:0, diameterBottom:0.07, tessellation:3}), gc,
+      Math.cos(a)*d, h/2, Math.sin(a)*d, {rx:(hash(i,15)-0.5)*0.6, rz:(hash(i,16)-0.5)*0.6, flat:false}));
+  }
+  const g = merge("grassSrc", blades);
+  const f = merge("flowerSrc", [
+    part(MB.CreateCylinder("s",{height:0.4, diameter:0.04, tessellation:4}), C(0.25,0.45,0.15), 0,0.2,0, {flat:false}),
+    part(MB.CreateIcoSphere("p",{radius:0.09, subdivisions:0}), C(0.95,0.9,0.4), 0,0.42,0),
+  ]);
+  const fillThin = (mesh, n, area, cond) => {
+    const mats = []; const M = BABYLON.Matrix;
+    let k=0, tries=0;
+    while(k<n && tries<n*4){
+      tries++;
+      const x=(Math.random()-0.5)*area, z=(Math.random()-0.5)*area;
+      const y=height(x,z); if(!cond(x,y,z)) continue;
+      const s=0.7+Math.random()*0.8;
+      const m = M.Scaling(s, s*(0.8+Math.random()*0.6), s).multiply(M.RotationY(Math.random()*6.28)).multiply(M.Translation(x,y-0.03,z));
+      mats.push(m); k++;
+    }
+    const buf = new Float32Array(mats.length*16); mats.forEach((m,i)=>m.copyToArray(buf,i*16));
+    mesh.thinInstanceSetBuffer("matrix", buf, 16, true);
+    mesh.isPickable = false; mesh.receiveShadows = true;
+    mesh.alwaysSelectAsActiveMesh = true;
+  };
+  fillThin(g, 14000, 300, (x,y,z)=> y>1.6 && y<14 && Math.hypot(x-TC_POS.x,z-TC_POS.z)>16 && fbm(x*0.05,z*0.05,2)>0.42);
+  fillThin(f, 1800, 280, (x,y,z)=> y>1.6 && y<10 && Math.hypot(x-TC_POS.x,z-TC_POS.z)>18 && fbm(x*0.03+9,z*0.03,2)>0.55);
+  const fm = new BABYLON.StandardMaterial("fm", scene); fm.specularColor = C(0,0,0); fm.backFaceCulling=false; fm.twoSidedLighting = true; fm.emissiveColor = C(0.05,0.07,0.02);
+  g.material = fm; f.material = fm;
+  // roseaux autour du lac
+  const reed = merge("reedSrc", [0,1,2].map(i=>part(MB.CreateCylinder("r",{height:1.4, diameterTop:0.02, diameterBottom:0.06, tessellation:3}), C(0.42,0.5,0.22), (i-1)*0.12,0.7,(i%2)*0.1, {rz:(i-1)*0.15, flat:false})));
+  reed.material = fm;
+  fillThin(reed, 900, MAP-10, (x,y,z)=> y>-0.4 && y<1.1 && Math.hypot(x-LAKE.x,z-LAKE.z)<LAKE.r*1.4);
+}
+
+/* ============================================================
+   MEMBRES DE LA TRIBU (personnages détaillés)
+   ============================================================ */
+const charMat = new BABYLON.StandardMaterial("charMat", scene);
+charMat.specularColor = C(0.06,0.05,0.04); charMat.specularPower = 24;
+const matRing = new BABYLON.StandardMaterial("ring", scene); matRing.emissiveColor = C(0.45,1,0.4); matRing.disableLighting = true; matRing.alpha = 0.85;
+const matRingB = new BABYLON.StandardMaterial("ringB", scene); matRingB.emissiveColor = C(0.45,1,0.4); matRingB.disableLighting = true; matRingB.alpha = 0.7;
+const SKINS = [C(0.80,0.58,0.44), C(0.66,0.46,0.32), C(0.88,0.68,0.53), C(0.54,0.37,0.26), C(0.74,0.52,0.38)];
+const HAIRS = [C(0.17,0.11,0.07), C(0.07,0.06,0.05), C(0.36,0.18,0.09), C(0.4,0.3,0.17), C(0.24,0.16,0.1)];
+const FURS  = [C(0.46,0.33,0.21), C(0.52,0.45,0.36), C(0.64,0.5,0.32), C(0.37,0.27,0.18), C(0.58,0.4,0.24)];
+const NAMES_M = ["Arok","Grom","Daro","Ourk","Kaï","Toran","Brak","Uro","Zag","Hrun"];
+const NAMES_F = ["Nala","Ysa","Bena","Siba","Mika","Ayla","Tiri","Rhaa","Oda","Lun"];
+const M_ = (name, col, spec=0.03) => { const m=new BABYLON.StandardMaterial(name, scene); m.diffuseColor=col; m.specularColor=C(spec,spec,spec); return m; };
+const stumpMat = M_("stumpM", C(0.4,0.28,0.17));
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const shade = (c,k) => new BABYLON.Color3(c.r*k, c.g*k, c.b*k);
+function charMesh(name, parts, parent){ const m = merge(name, parts); m.material = charMat; m.parent = parent; return m; }
+const smoothP = (mesh, color, x,y,z, o={}) => part(mesh, color, x,y,z, Object.assign({flat:false}, o));
+
+let unitId = 0;
+function createVillager(x, z){
+  const id = ++unitId;
+  const female = Math.random() < 0.45;
+  const skin = pick(SKINS), hair = pick(HAIRS), fur = pick(FURS), fur2 = shade(fur, 0.78), rope = C(0.5,0.4,0.25);
+  const name = female ? pick(NAMES_F) : pick(NAMES_M);
+  const root = new BABYLON.TransformNode("v"+id, scene);
+  const body = new BABYLON.TransformNode("body"+id, scene); body.parent = root;
+  const meshes = []; const reg = m => { meshes.push(m); return m; };
+  const node = (n, parent, x, y, z) => { const t = new BABYLON.TransformNode(n, scene); t.parent = parent; t.position.set(x,y,z); return t; };
+
+  // ---- jambes : hanche → genou ----
+  const hips = [], knees = [];
+  [-1, 1].forEach(sx=>{
+    const hip = node("hip", body, sx*0.11, 0.93, 0);
+    reg(charMesh("thigh", [
+      smoothP(MB.CreateCapsule("c",{height:0.52, radius:0.078, tessellation:16}), skin, 0,-0.22,0),
+      part(MB.CreateCylinder("fw",{height:0.22, diameterTop:0.2, diameterBottom:0.22, tessellation:9}), fur, 0,-0.07,0, {jitter:0.03}),
+    ], hip));
+    const knee = node("knee", hip, 0, -0.45, 0);
+    reg(charMesh("shin", [
+      smoothP(MB.CreateCapsule("c",{height:0.48, radius:0.064, tessellation:16}), skin, 0,-0.21,0),
+      part(MB.CreateCylinder("wrap",{height:0.14, diameterTop:0.15, diameterBottom:0.17, tessellation:8}), fur2, 0,-0.36,0, {jitter:0.02}),
+      part(MB.CreateBox("foot",{width:0.12, height:0.08, depth:0.24}), fur2, 0,-0.44,0.05, {jitter:0.02}),
+      smoothP(MB.CreateTorus("lace",{diameter:0.155, thickness:0.015, tessellation:10}), rope, 0,-0.33,0),
+    ], knee));
+    hips.push(hip); knees.push(knee);
+  });
+
+  // ---- buste & vêtement en peau ----
+  const torsoParts = [
+    smoothP(MB.CreateCapsule("chest",{height:0.66, radius:0.2, tessellation:18}), skin, 0,1.2,0, {sc:[1,1,0.72]}),
+    part(MB.CreateCylinder("tunic",{height:0.52, diameterTop:0.47, diameterBottom:0.58, tessellation:12}), fur, 0,1.0,0, {jitter:0.04, sc:[1,1,0.82]}),
+    part(MB.CreateCylinder("fringe",{height:0.1, diameterTop:0.58, diameterBottom:0.64, tessellation:14}), fur2, 0,0.71,0, {jitter:0.05, sc:[1,1,0.84]}),
+    smoothP(MB.CreateTorus("belt",{diameter:0.5, thickness:0.045, tessellation:16}), rope, 0,0.95,0, {sc:[1,1,0.84]}),
+    part(MB.CreateBox("pouch",{width:0.12, height:0.14, depth:0.07}), fur2, 0.24,0.88,0.06, {jitter:0.02, ry:0.4}),
+    part(MB.CreateIcoSphere("tooth",{radius:0.025, subdivisions:0}), C(0.95,0.93,0.85), 0,1.38,0.155, {sc:[0.6,1.4,0.6]}),
+    smoothP(MB.CreateTorus("neck",{diameter:0.2, thickness:0.012, tessellation:12}), rope, 0,1.46,0.03, {rx:0.5}),
+    smoothP(MB.CreateCylinder("neckS",{height:0.14, diameter:0.13, tessellation:10}), skin, 0,1.53,0),
+  ];
+  if (female){
+    torsoParts.push(part(MB.CreateCylinder("top",{height:0.3, diameterTop:0.42, diameterBottom:0.48, tessellation:12}), fur, 0,1.3,0, {jitter:0.03, sc:[1,1,0.8]}));
+  } else {
+    // bandoulière en fourrure sur l'épaule gauche
+    torsoParts.push(part(MB.CreateBox("strap",{width:0.16, height:0.7, depth:0.4}), fur, -0.07,1.25,0, {rz:-0.62, jitter:0.04}));
+  }
+  reg(charMesh("torso", torsoParts, body));
+
+  // ---- tête ----
+  const head = node("head", body, 0, 1.57, 0);
+  const H = [
+    smoothP(MB.CreateSphere("skull",{diameter:0.28, segments:14}), skin, 0,0.14,0, {sc:[0.92,1.05,1]}),
+    smoothP(MB.CreateSphere("jaw",{diameter:0.2, segments:10}), skin, 0,0.05,0.04, {sc:[1,0.72,1]}),
+    smoothP(MB.CreateSphere("brow",{diameter:0.25, segments:10}), shade(skin,0.93), 0,0.185,0.075, {sc:[1,0.28,0.5]}),
+    smoothP(MB.CreateSphere("nose",{diameter:0.075, segments:8}), shade(skin,0.96), 0,0.11,0.135, {sc:[1.1,1,1.15]}),
+    smoothP(MB.CreateSphere("lips",{diameter:0.07, segments:8}), shade(skin,0.82), 0,0.055,0.125, {sc:[1.3,0.45,0.6]}),
+  ];
+  [-1,1].forEach(s=>{
+    H.push(smoothP(MB.CreateSphere("ear",{diameter:0.075, segments:8}), shade(skin,0.95), s*0.132,0.13,-0.005, {sc:[0.45,1,0.75]}));
+    H.push(smoothP(MB.CreateSphere("eye",{diameter:0.048, segments:8}), C(0.95,0.93,0.9), s*0.052,0.145,0.112));
+    H.push(smoothP(MB.CreateSphere("iris",{diameter:0.026, segments:6}), C(0.18,0.12,0.08), s*0.052,0.145,0.133));
+    H.push(part(MB.CreateBox("eyebrow",{width:0.07, height:0.016, depth:0.03}), shade(hair,0.9), s*0.053,0.183,0.128, {rz:-s*0.12}));
+    H.push(smoothP(MB.CreateSphere("cheek",{diameter:0.08, segments:6}), shade(skin,0.97), s*0.065,0.085,0.09, {sc:[1,0.8,0.8]}));
+  });
+  H.push(part(MB.CreateIcoSphere("hair",{radius:0.155, subdivisions:2}), hair, 0,0.215,-0.045, {jitter:0.05, sc:[1.06,0.9,1.06]}));
+  if (female){
+    H.push(part(MB.CreateIcoSphere("hairL",{radius:0.13, subdivisions:2}), hair, 0,0.02,-0.11, {jitter:0.05, sc:[1.15,2.1,0.6]}));
+    [-1,1].forEach(s=>H.push(part(MB.CreateIcoSphere("hairS",{radius:0.06, subdivisions:1}), hair, s*0.13,0.06,-0.03, {jitter:0.02, sc:[0.7,2.2,0.8]})));
+    H.push(smoothP(MB.CreateTorus("band",{diameter:0.3, thickness:0.02, tessellation:16}), C(0.6,0.25,0.15), 0,0.2,-0.01, {rx:-0.25, sc:[1,1,1.05]}));
+  } else {
+    H.push(part(MB.CreateIcoSphere("beard",{radius:0.115, subdivisions:2}), hair, 0,0.02,0.07, {jitter:0.04, sc:[1.12,1.05,0.75]}));
+    H.push(part(MB.CreateIcoSphere("mous",{radius:0.05, subdivisions:1}), hair, 0,0.08,0.13, {jitter:0.015, sc:[1.6,0.5,0.6]}));
+    H.push(part(MB.CreateIcoSphere("hairB",{radius:0.12, subdivisions:1}), hair, 0,0.1,-0.11, {jitter:0.04, sc:[1.1,1.2,0.6]}));
+  }
+  reg(charMesh("head", H, head));
+
+  // ---- bras : épaule → coude ----
+  const shoulders = [], elbows = [];
+  [-1, 1].forEach(sx=>{
+    const sh = node("sh", body, sx*0.26, 1.42, 0); sh.rotation.z = sx*0.1;
+    const up = [ smoothP(MB.CreateCapsule("c",{height:0.36, radius:0.062, tessellation:16}), skin, 0,-0.15,0) ];
+    if (!female && sx===-1) up.push(part(MB.CreateCylinder("cap",{height:0.18, diameter:0.17, tessellation:9}), fur, 0,-0.04,0, {jitter:0.03}));
+    up.push(smoothP(MB.CreateTorus("arml",{diameter:0.13, thickness:0.016, tessellation:10}), rope, 0,-0.2,0));
+    reg(charMesh("upArm", up, sh));
+    const el = node("elbow", sh, 0, -0.3, 0);
+    reg(charMesh("foreArm", [
+      smoothP(MB.CreateCapsule("c",{height:0.32, radius:0.053, tessellation:16}), skin, 0,-0.13,0),
+      part(MB.CreateCylinder("wrist",{height:0.06, diameter:0.11, tessellation:8}), fur2, 0,-0.22,0),
+      smoothP(MB.CreateSphere("hand",{diameter:0.11, segments:8}), skin, 0,-0.3,0.01, {sc:[0.75,1.1,0.95]}),
+      smoothP(MB.CreateCapsule("thumb",{height:0.07, radius:0.018, tessellation:6}), skin, -sx*0.035,-0.28,0.045, {rx:0.6}),
+    ], el));
+    shoulders.push(sh); elbows.push(el);
+  });
+
+  // ---- outil : hache de pierre (main droite) ----
+  const toolNode = node("tool", elbows[1], 0, -0.3, 0.02);
+  const tool = reg(charMesh("axe", [
+    part(MB.CreateCylinder("handle",{height:0.62, diameterTop:0.035, diameterBottom:0.045, tessellation:6}), C(0.42,0.3,0.18), 0,0.05,0, {jitter:0.01}),
+    part(MB.CreateIcoSphere("blade",{radius:0.075, subdivisions:1}), C(0.42,0.43,0.45), 0,0.33,0.06, {jitter:0.03, sc:[0.55,1,1.6]}),
+    smoothP(MB.CreateTorus("bind",{diameter:0.065, thickness:0.02, tessellation:8}), rope, 0,0.3,0),
+  ], toolNode));
+  toolNode.rotation.x = Math.PI/2;
+  // ---- charges transportées ----
+  const bundles = {
+    wood: reg(charMesh("logs", [0,1,2].map(i=>part(MB.CreateCylinder("lg",{height:0.85, diameter:0.1+i*0.01, tessellation:7}), C(0.42-i*0.03,0.3,0.18), (i-1)*0.06, 1.5+(i%2)*0.07, -0.18+(i-1)*0.06, {rz:Math.PI/2+(i-1)*0.12, jitter:0.02})), body)),
+    food: reg(charMesh("berries", [
+      part(MB.CreateIcoSphere("sack",{radius:0.17, subdivisions:1}), C(0.32,0.45,0.2), 0,1.15,-0.24, {jitter:0.05, sc:[1,1.1,0.8]}),
+      ...[0,1,2,3,4].map(i=>part(MB.CreateIcoSphere("b",{radius:0.035, subdivisions:0}), C(0.72,0.08,0.18), Math.cos(i*1.3)*0.08, 1.31, -0.24+Math.sin(i*1.3)*0.06)),
+    ], body)),
+    stone: reg(charMesh("stones", [
+      part(MB.CreateIcoSphere("sack",{radius:0.17, subdivisions:1}), shade(fur,0.9), 0,1.15,-0.24, {jitter:0.05, sc:[1,1.1,0.8]}),
+      ...[0,1,2].map(i=>part(MB.CreateIcoSphere("s",{radius:0.07, subdivisions:0}), C(0.6,0.6,0.58), (i-1)*0.09, 1.31, -0.24, {jitter:0.03}))
+    ], body)),
+  };
+  Object.values(bundles).forEach(b=>b.isVisible=false);
+  tool.isVisible = false;
+
+  // anneau de sélection
+  const ring = MB.CreateTorus("ring",{diameter:1.15, thickness:0.07, tessellation:28}, scene);
+  ring.material = matRing; ring.parent = root; ring.position.y = 0.06; ring.isVisible = false; ring.isPickable = false;
+  meshes.forEach(m=>{ addCaster(m); });
+  const scale = (female ? 0.93 : 1.0) * (0.95 + Math.random()*0.1);
+  root.scaling.setAll(scale);
+  const u = { id, x, z, root, body, head, hips, knees, shoulders, elbows, bundles, tool, ring, meshes, female, name,
+    state:'idle', tx:x, tz:z, target:null, carry:0, carryType:null, gatherT:0, anim:Math.random()*10,
+    speed:5.0 + Math.random()*0.5, heading:0, lastRes:null, selected:false,
+    label: female ? "Cueilleuse" : "Cueilleur" };
+  tagMeshes(meshes, 'unit', u);
+  root.position.set(x, height(x,z), z);
+  units.push(u); return u;
+}
+[[-22,-13],[-38,-13],[-30,-29],[-24,-27]].forEach(([x,z])=>{ const u = createVillager(x,z); u.heading = Math.atan2(x-TC_POS.x, z-TC_POS.z); });
+
+/* ============================================================
+   IA DES UNITÉS
+   ============================================================ */
+function nearestRes(type, x, z, maxD=60){
+  let best=null, bd=maxD;
+  for(const r of resources){ if(r.type!==type || r.amount<=0) continue;
+    const d = Math.hypot(r.x-x, r.z-z); if(d<bd){ bd=d; best=r; } }
+  return best;
+}
+function nearestDrop(x,z){ return townCenter; }
+function approachPoint(ux, uz, ox, oz, dist){
+  let dx=ux-ox, dz=uz-oz; const L=Math.hypot(dx,dz)||1;
+  return { x: ox + dx/L*dist, z: oz + dz/L*dist };
+}
+function orderMove(u, x, z){ u.job=null; u.state='moving'; u.tx=x; u.tz=z; u.target=null; }
+function orderGather(u, res){
+  if(u.carry>0 && u.carryType!==res.type){ u.carry=0; u.carryType=null; }
+  u.state='toRes'; u.target=res; u.lastRes=res;
+  const p = approachPoint(u.x,u.z,res.x,res.z,res.r+0.55); u.tx=p.x; u.tz=p.z;
+}
+function orderDrop(u){
+  const b = nearestDrop(u.x,u.z); u.state='toDrop'; u.target=b;
+  const p = approachPoint(u.x,u.z,b.x,b.z,b.r+0.4); u.tx=p.x; u.tz=p.z;
+}
+function depleteRes(res){
+  res.amount = 0;
+  res.meshes.forEach(m=>{
+    if(res.type==='wood'){
+      const st = MB.CreateCylinder("stump",{height:0.45, diameterTop:0.45, diameterBottom:0.6, tessellation:7}, scene);
+      st.material = stumpMat; st.position.set(res.x, height(res.x,res.z)+0.15, res.z); st.isPickable=false; st.receiveShadows = true;
+    }
+    if (m instanceof BABYLON.InstancedMesh) m.dispose();
+    else { m.scaling.setAll(0.0001); m.isPickable = false; } // maillage source : on le masque sans toucher aux instances
+  });
+  const i = resources.indexOf(res); if(i>=0) resources.splice(i,1);
+}
+
+const SEP = 0.85;
+function stepUnit(u, dt){
+  u.anim += dt;
+  let moving = false;
+  if (u.state==='moving' || u.state==='toRes' || u.state==='toDrop' || u.state==='toPile' || u.state==='toFire'){
+    // ressource disparue en chemin
+    if (u.state==='toRes' && (!u.target || u.target.amount<=0)){
+      const n = nearestRes(u.lastRes ? u.lastRes.type : 'wood', u.x, u.z, 40);
+      if(n) orderGather(u, n); else { u.state='idle'; }
+    }
+    let dx = u.tx-u.x, dz = u.tz-u.z; const d = Math.hypot(dx,dz);
+    const arrive = u.state==='moving' ? 0.25 : 0.35;
+    if (d < arrive){
+      if (u.state==='moving') u.state='idle';
+      else if (u.state==='toRes'){ u.state='gather'; u.gatherT=0; if(u.carryType!==u.target.type){u.carry=0;} u.carryType=u.target.type; }
+      else if (u.state==='toDrop') {
+        if (u.carry>0 && u.carryType){ stock[u.carryType]+=Math.floor(u.carry); floatText(u.x, u.z, "+"+Math.floor(u.carry)+" "+RES_INFO[u.carryType].ico); }
+        u.carry=0;
+        const back = (u.lastRes && u.lastRes.amount>0) ? u.lastRes : (u.carryType ? nearestRes(u.carryType, u.x, u.z, 60) : null);
+        if (back) orderGather(u, back); else u.state='idle';
+      }
+      else if (u.state==='toPile'){
+        const take = Math.min(10, Math.floor(stock.wood));
+        if (take<=0){ u.state='keep'; if(!u.noWood){ u.noWood=true; toast("Plus de bois en réserve pour le feu !"); } }
+        else { u.noWood=false; stock.wood -= take; u.carry = take; u.carryType='wood'; orderToFire(u); }
+      }
+      else if (u.state==='toFire'){ feedFire(u); }
+    } else {
+      let vx = dx/d, vz = dz/d;
+      // évitement : autres unités, bâtiments, arbres
+      for (const o of units){ if(o===u) continue; const ox=u.x-o.x, oz=u.z-o.z, od=Math.hypot(ox,oz);
+        if(od<SEP && od>0.001){ const f=(SEP-od)/SEP*1.5; vx+=ox/od*f; vz+=oz/od*f; } }
+      for (const b of buildings){ const ox=u.x-b.x, oz=u.z-b.z, od=Math.hypot(ox,oz), R=b.r+0.6;
+        if(od<R+1.5 && u.target!==b){ const f=clamp((R+1.5-od)/1.5,0,2)*1.6; vx+=ox/od*f; vz+=oz/od*f;
+          // contourner : composante tangentielle
+          const side = (ox*dz - oz*dx) > 0 ? 1 : -1; vx += -oz/od*f*0.8*side; vz += ox/od*f*0.8*side; } }
+      for (const r of resources){ if(r===u.target) continue; const ox=u.x-r.x, oz=u.z-r.z; if(Math.abs(ox)>3||Math.abs(oz)>3) continue;
+        const od=Math.hypot(ox,oz), R=r.r+0.35; if(od<R+0.5 && od>0.001){ const f=(R+0.5-od)/0.5*0.9; vx+=ox/od*f; vz+=oz/od*f; } }
+      const vl = Math.hypot(vx,vz)||1; vx/=vl; vz/=vl;
+      const sp = u.speed * Math.min(1, d/0.8 + 0.3);
+      let nx = u.x + vx*sp*dt, nz = u.z + vz*sp*dt;
+      // pas dans l'eau
+      if (height(nx,nz) < 0.35){
+        let ok=false;
+        for (const a of [0.6,-0.6,1.2,-1.2]){ const ca=Math.cos(a), sa=Math.sin(a);
+          const rx = vx*ca - vz*sa, rz = vx*sa + vz*ca; const tx=u.x+rx*sp*dt, tz=u.z+rz*sp*dt;
+          if(height(tx,tz)>=0.35){ nx=tx; nz=tz; vx=rx; vz=rz; ok=true; break; } }
+        if(!ok){ nx=u.x; nz=u.z; if(u.state==='moving') u.state='idle'; }
+      }
+      u.x = clamp(nx, -HALF+5, HALF-5); u.z = clamp(nz, -HALF+5, HALF-5);
+      const h = Math.atan2(vx, vz);
+      u.heading = lerpAngle(u.heading, h, Math.min(1, dt*10));
+      moving = true;
+    }
+  } else if (u.state==='feeding'){
+    u.heading = lerpAngle(u.heading, Math.atan2(FIRE_POS.x-u.x, FIRE_POS.z-u.z), Math.min(1, dt*8));
+    u.feedT -= dt; if (u.feedT<=0) u.state = u.job==='fire' ? 'keep' : 'idle';
+  } else if (u.state==='keep'){
+    u.heading = lerpAngle(u.heading, Math.atan2(FIRE_POS.x-u.x, FIRE_POS.z-u.z), Math.min(1, dt*3));
+    if (u.job!=='fire') u.state='idle';
+    else if (FIRE.fuel < 70 && stock.wood >= 1) orderToPile(u);
+  } else if (u.state==='gather'){
+    const res = u.target;
+    if (!res || res.amount<=0){
+      const n = nearestRes(u.carryType||'wood', u.x, u.z, 40);
+      if (n) orderGather(u, n); else if (u.carry>0) orderDrop(u); else u.state='idle';
+    } else {
+      u.heading = lerpAngle(u.heading, Math.atan2(res.x-u.x, res.z-u.z), Math.min(1, dt*8));
+      u.gatherT += dt;
+      const amt = RES_INFO[res.type].rate * dt * (FIRE.out ? 0.5 : 1);
+      u.carry += amt; res.amount -= amt;
+      if (res.type==='wood' && res.meshes[0]) { // l'arbre tremble
+        const m = res.meshes[0]; m.rotation.x = Math.sin(u.anim*20)*0.01;
+      }
+      if (res.amount <= 0) depleteRes(res);
+      if (u.carry >= 10){ u.carry = 10; orderDrop(u); }
+    }
+  }
+  // position & animation
+  const y = height(u.x, u.z);
+  u.root.position.set(u.x, y, u.z);
+  u.root.rotation.y = u.heading;
+  const t = u.anim;
+  const H = u.hips, K = u.knees, S = u.shoulders, E = u.elbows;
+  let crouch = 0, headYaw = 0, headPitch = 0, twist = 0;
+  if (moving){
+    const w = t*9.5, s = Math.sin(w);
+    H[0].rotation.x = s*0.55; H[1].rotation.x = -s*0.55;
+    K[0].rotation.x = 0.1 + Math.max(0, Math.sin(w + 1.3))*0.95;
+    K[1].rotation.x = 0.1 + Math.max(0, Math.sin(w + 1.3 + Math.PI))*0.95;
+    S[0].rotation.x = -s*0.5; S[1].rotation.x = s*0.5;
+    E[0].rotation.x = -0.35 - Math.max(0,-s)*0.3; E[1].rotation.x = -0.35 - Math.max(0,s)*0.3;
+    u.body.position.y = Math.abs(Math.cos(w))*0.05 - 0.02;
+    twist = s*0.07; headPitch = 0.05;
+  } else if (u.state==='feeding'){
+    const k = smooth(0, 0.5, 1.1-u.feedT) * (1 - smooth(0.8, 1.1, 1.1-u.feedT));
+    crouch = 0.18*k; H[0].rotation.x = -0.6*k; H[1].rotation.x = -0.3*k; K[0].rotation.x = 1.0*k; K[1].rotation.x = 0.7*k;
+    S[0].rotation.x = S[1].rotation.x = -1.2*k; E[0].rotation.x = E[1].rotation.x = -0.3*k; headPitch = 0.35*k;
+    u.body.position.y = -crouch;
+  } else if (u.state==='gather'){
+    const type = u.target ? u.target.type : 'wood';
+    if (type==='food'){
+      // accroupi, cueille des deux mains
+      const s = Math.sin(t*5);
+      crouch = 0.22;
+      H[0].rotation.x = -0.75; H[1].rotation.x = -0.45; K[0].rotation.x = 1.25; K[1].rotation.x = 0.95;
+      S[0].rotation.x = -1.0 + s*0.35; S[1].rotation.x = -1.0 - s*0.35;
+      E[0].rotation.x = -0.5 - Math.max(0,s)*0.5; E[1].rotation.x = -0.5 - Math.max(0,-s)*0.5;
+      headPitch = 0.35; twist = s*0.08;
+    } else {
+      // frappe avec la hache de pierre
+      const sp = type==='wood' ? 6 : 4.5;
+      const ph = (t*sp) % (Math.PI*2);
+      const up = ph < 3.6 ? smooth(0, 3.6, ph) : 1 - smooth(3.6, 4.4, ph); // lève lentement, frappe vite
+      const raise = -0.5 - up*2.4;
+      S[1].rotation.x = raise; S[0].rotation.x = raise*0.85;
+      E[1].rotation.x = -0.25 - up*0.6; E[0].rotation.x = -0.35 - up*0.5;
+      H[0].rotation.x = -0.25; H[1].rotation.x = 0.2; K[0].rotation.x = 0.35; K[1].rotation.x = 0.15;
+      crouch = type==='stone' ? 0.1 : 0.04;
+      headPitch = 0.2 - up*0.15; twist = (1-up)*0.12;
+    }
+    u.body.position.y = -crouch;
+  } else {
+    // repos : respiration, regarde autour de lui
+    H[0].rotation.x = H[1].rotation.x = 0; K[0].rotation.x = K[1].rotation.x = 0.04;
+    S[0].rotation.x = S[1].rotation.x = Math.sin(t*1.5)*0.04;
+    E[0].rotation.x = E[1].rotation.x = -0.12;
+    u.body.position.y = Math.sin(t*2)*0.012;
+    headYaw = Math.sin(t*0.45 + u.id)*0.5 * smooth(0.3, 0.8, Math.sin(t*0.2 + u.id*2));
+  }
+  u.body.rotation.y = twist;
+  u.head.rotation.y = headYaw - twist;
+  u.head.rotation.x = headPitch;
+  const showTool = u.state==='gather' && u.target && u.target.type!=='food';
+  u.tool.isVisible = showTool;
+  const showLoad = u.carry >= 1 && u.state!=='gather';
+  for (const k in u.bundles) u.bundles[k].isVisible = showLoad && u.carryType===k;
+}
+function lerpAngle(a, b, t){ let d = ((b-a+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI; return a + d*t; }
+
+/* Formation du villageois */
+function trainVillager(){
+  if (units.length + townCenter.queue >= POP_MAX){ toast("Population maximale atteinte"); return; }
+  if (stock.food < 50){ toast("Pas assez de nourriture (50 🍖)"); return; }
+  if (townCenter.queue >= 5){ toast("File d'attente pleine"); return; }
+  stock.food -= 50; townCenter.queue++;
+}
+const TRAIN_TIME = 8;
+function stepTC(dt){
+  const b = townCenter;
+  if (b.queue>0){
+    if (units.length >= POP_MAX || FIRE.out){ return; }
+    b.progress += dt/TRAIN_TIME;
+    if (b.progress >= 1){
+      b.progress = 0; b.queue--;
+      const sx = b.x + 0.3, sz = b.z - b.r - 0.8;
+      const u = createVillager(sx, sz); u.heading = Math.PI;
+      if (b.rally){
+        if (b.rally.fire) orderFeed(u); else if (b.rally.res && b.rally.res.amount>0) orderGather(u, b.rally.res); else orderMove(u, b.rally.x, b.rally.z);
+      } else orderMove(u, sx + (Math.random()-0.5)*3, sz - 3);
+      toast("Un nouveau membre rejoint la tribu : "+u.name+" !");
+    }
+  }
+}
+
+/* ============================================================
+   SÉLECTION & ORDRES
+   ============================================================ */
+let selected = [];       // unités
+let selBuilding = null;
+const tcRing = MB.CreateTorus("tcRing",{diameter:townCenter.r*2+1.2, thickness:0.18, tessellation:64}, scene);
+tcRing.material = matRingB; tcRing.position.set(townCenter.x, height(townCenter.x,townCenter.z)+0.45, townCenter.z); tcRing.isVisible=false; tcRing.isPickable=false;
+const rallyFlag = (()=>{ const m = merge("rally",[ part(MB.CreateCylinder("p",{height:2.2, diameter:0.07}), C(0.4,0.28,0.16), 0,1.1,0, {flat:false}), part(MB.CreateBox("f",{width:0.8,height:0.5,depth:0.03}), C(0.66,0.5,0.32), 0.42,1.9,0) ]); m.isVisible=false; m.isPickable=false; return m; })();
+
+function clearSelection(){ selected.forEach(u=>{u.selected=false; u.ring.isVisible=false;}); selected=[]; selBuilding=null; tcRing.isVisible=false; rallyFlag.isVisible=false; }
+function selectUnits(list){ clearSelection(); selected = list; list.forEach(u=>{u.selected=true; u.ring.isVisible=true;}); updateSelPanel(true); }
+function selectBuilding(b){ clearSelection(); selBuilding=b; if(b===townCenter){ tcRing.isVisible=true; if(b.rally){ rallyFlag.isVisible=true; } } updateSelPanel(true); }
+
+function pickAt(x, y){
+  const p = scene.pick(x, y, m => m.isPickable && m.isEnabled() && m.isVisible && m.metadata && m.metadata.kind);
+  if (!p || !p.hit) return null;
+  return { kind:p.pickedMesh.metadata.kind, ref:p.pickedMesh.metadata.ref, point:p.pickedPoint };
+}
+
+// marqueur de destination
+const marker = MB.CreateTorus("marker",{diameter:1.2, thickness:0.08, tessellation:24}, scene);
+marker.material = matRing; marker.isPickable=false; marker.isVisible=false; let markerT=0;
+function showMarker(x,z,color){ marker.position.set(x, height(x,z)+0.08, z); marker.isVisible=true; markerT=0.6; matRing.emissiveColor = color || C(0.45,1,0.4); }
+
+function command(x, y){
+  const hit = pickAt(x, y); if(!hit) return;
+  if (selBuilding === townCenter){
+    if (hit.kind==='fire'){ townCenter.rally = { x:FIRE_POS.x, z:FIRE_POS.z-1.6, res:null, fire:true }; }
+    else if (hit.kind==='res'){ townCenter.rally = { x:hit.ref.x, z:hit.ref.z, res:hit.ref }; }
+    else { townCenter.rally = { x:hit.point.x, z:hit.point.z, res:null }; }
+    rallyFlag.position.set(townCenter.rally.x, height(townCenter.rally.x, townCenter.rally.z), townCenter.rally.z); rallyFlag.isVisible = true;
+    toast(hit.kind==='fire' ? "Les nouveaux membres garderont le feu" : "Point de ralliement défini"); return;
+  }
+  if (!selected.length) return;
+  if (hit.kind==='fire'){
+    selected.forEach(orderFeed);
+    toast(selected.length>1 ? selected.length+" membres vont entretenir le feu" : `${selected[0].name} va entretenir le feu`);
+    showMarker(FIRE_POS.x, FIRE_POS.z, C(1,0.55,0.2));
+  } else if (hit.kind==='res'){
+    selected.forEach(u=>orderGather(u, hit.ref));
+    showMarker(hit.ref.x, hit.ref.z, C(1,0.85,0.3));
+  } else if (hit.kind==='bld' && hit.ref===townCenter){
+    selected.forEach(u=>{ if(u.carry>0) orderDrop(u); else { const p=approachPoint(u.x,u.z,townCenter.x,townCenter.z,townCenter.r+1); orderMove(u,p.x,p.z);} });
+  } else {
+    const px = hit.point.x, pz = hit.point.z;
+    const n = selected.length, cols = Math.ceil(Math.sqrt(n));
+    selected.forEach((u,i)=>{
+      const cx = (i%cols) - (cols-1)/2, cz = Math.floor(i/cols) - (Math.ceil(n/cols)-1)/2;
+      orderMove(u, px + cx*1.3, pz + cz*1.3);
+    });
+    showMarker(px, pz);
+  }
+  updateSelPanel(true);
+}
+
+/* ============================================================
+   CAMÉRA : déplacement, rotation, suivi
+   ============================================================ */
+const keys = {};
+let follow = null, orbitAuto = false;
+let mouse = { x:-1, y:-1, inside:false };
+let edgeScroll = true;
+window.addEventListener('keydown', e=>{
+  if (e.target.tagName==='INPUT') return;
+  keys[e.code] = true;
+  if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault();
+  if (e.code==='Escape'){ follow=null; orbitAuto=false; clearSelection(); updateSelPanel(true); }
+  if (e.code==='KeyO'){ toggleOrbit(); }
+  if (e.code==='Space'){ goHome(); }
+  if (e.code==='KeyH'){ toggleHelp(); }
+  if (e.code==='KeyV' && selBuilding===townCenter){ trainVillager(); updateSelPanel(true); }
+});
+window.addEventListener('keyup', e=>{ keys[e.code] = false; });
+window.addEventListener('blur', ()=>{ for(const k in keys) keys[k]=false; });
+
+function goHome(){ follow = null; camTargetGoal = new BABYLON.Vector3(TC_POS.x, 2.4, TC_POS.z); }
+function toggleOrbit(){ orbitAuto = !orbitAuto; $('btnOrbit').style.outline = orbitAuto ? '1px solid var(--gold)' : 'none'; }
+let camTargetGoal = null;
+
+function updateCamera(dt){
+  const fwd = camera.getDirection(BABYLON.Axis.Z); fwd.y = 0; fwd.normalize();
+  const right = camera.getDirection(BABYLON.Axis.X); right.y = 0; right.normalize();
+  let mx=0, mz=0;
+  if (keys.KeyW || keys.ArrowUp) mz += 1;
+  if (keys.KeyS || keys.ArrowDown) mz -= 1;
+  if (keys.KeyA || keys.ArrowLeft) mx -= 1;
+  if (keys.KeyD || keys.ArrowRight) mx += 1;
+  if (edgeScroll && mouse.inside && !dragRotate && !down){
+    const W = canvas.clientWidth, H = canvas.clientHeight, m = 6;
+    if (mouse.x < m) mx -= 1; if (mouse.x > W-m) mx += 1;
+    if (mouse.y < m) mz += 1; if (mouse.y > H-m) mz -= 1;
+  }
+  if (mx || mz){ follow = null; camTargetGoal = null; }
+  const speed = (20 + camera.radius*0.9) * dt;
+  const t = camera.target;
+  t.addInPlace(fwd.scale(mz*speed)).addInPlace(right.scale(mx*speed));
+  if (keys.KeyQ) camera.alpha += 1.6*dt;
+  if (keys.KeyE) camera.alpha -= 1.6*dt;
+  if (orbitAuto) camera.alpha -= 0.18*dt;
+  if (follow){
+    const fp = follow.kind==='unit' ? new BABYLON.Vector3(follow.ref.x, height(follow.ref.x,follow.ref.z)+1, follow.ref.z)
+                                    : new BABYLON.Vector3(follow.ref.x, height(follow.ref.x,follow.ref.z)+2, follow.ref.z);
+    BABYLON.Vector3.LerpToRef(t, fp, Math.min(1, dt*6), t);
+    if (follow.kind==='res' && follow.ref.amount<=0) follow=null;
+  } else if (camTargetGoal){
+    BABYLON.Vector3.LerpToRef(t, camTargetGoal, Math.min(1, dt*4), t);
+    if (BABYLON.Vector3.Distance(t, camTargetGoal) < 0.2) camTargetGoal = null;
+  } else {
+    t.y = lerp(t.y, Math.max(0, height(t.x, t.z)) + 1, Math.min(1, dt*5));
+  }
+  t.x = clamp(t.x, -HALF+20, HALF-20); t.z = clamp(t.z, -HALF+20, HALF-20);
+  // ne pas passer sous le relief
+  for (let i=0;i<6;i++){
+    const p = camera.position; const gh = Math.max(0, height(p.x, p.z)) + 2.5;
+    if (p.y < gh && camera.beta > camera.lowerBetaLimit){ camera.beta -= 0.02; camera.getViewMatrix(true); } else break;
+  }
+}
+
+/* ============================================================
+   SOURIS
+   clic gauche maintenu + glisser : orbite libre
+   Maj + glisser : sélection multiple (rectangle)
+   ============================================================ */
+const boxEl = $('box');
+let down = null, boxSel = false, dragRotate = null;
+canvas.addEventListener('contextmenu', e=>e.preventDefault());
+canvas.addEventListener('pointerenter', ()=>mouse.inside=true);
+canvas.addEventListener('pointerleave', ()=>{ mouse.inside=false; });
+function orbitBy(dx, dy){
+  camera.alpha -= dx*0.006;
+  camera.beta = clamp(camera.beta - dy*0.005, camera.lowerBetaLimit, camera.upperBetaLimit);
+  orbitAuto = false; $('btnOrbit').style.outline = 'none';
+}
+canvas.addEventListener('pointerdown', e=>{
+  canvas.focus();
+  if (e.button===1){ dragRotate = { x:e.clientX, y:e.clientY }; canvas.setPointerCapture(e.pointerId); e.preventDefault(); return; }
+  if (e.button===0){ down = { x:e.offsetX, y:e.offsetY, cx:e.clientX, cy:e.clientY, shift:e.shiftKey, mode:null }; canvas.setPointerCapture(e.pointerId); }
+  if (e.button===2){ command(e.offsetX, e.offsetY); }
+});
+canvas.addEventListener('pointermove', e=>{
+  mouse.x = e.offsetX; mouse.y = e.offsetY; mouse.inside = true;
+  if (dragRotate){ orbitBy(e.clientX-dragRotate.x, e.clientY-dragRotate.y); dragRotate = { x:e.clientX, y:e.clientY }; return; }
+  if (down){
+    const dx = e.offsetX-down.x, dy = e.offsetY-down.y;
+    if (!down.mode && Math.hypot(dx,dy) > 5){ down.mode = down.shift ? 'box' : 'orbit'; boxSel = down.mode==='box'; if(down.mode==='orbit') canvas.style.cursor='grabbing'; }
+    if (down.mode==='orbit'){ orbitBy(e.clientX-down.cx, e.clientY-down.cy); down.cx=e.clientX; down.cy=e.clientY; }
+    else if (down.mode==='box'){
+      const r = canvas.getBoundingClientRect();
+      Object.assign(boxEl.style, { display:'block', left:(r.left+Math.min(down.x,e.offsetX))+'px', top:(r.top+Math.min(down.y,e.offsetY))+'px',
+        width:Math.abs(dx)+'px', height:Math.abs(dy)+'px' });
+    }
+  } else hoverCursor(e.offsetX, e.offsetY);
+});
+canvas.addEventListener('pointerup', e=>{
+  if (dragRotate && e.button===1){ dragRotate=null; return; }
+  if (e.button!==0 || !down) return;
+  if (down.mode==='orbit'){ canvas.style.cursor='default'; }
+  else if (down.mode==='box'){
+    const x0=Math.min(down.x,e.offsetX), x1=Math.max(down.x,e.offsetX), y0=Math.min(down.y,e.offsetY), y1=Math.max(down.y,e.offsetY);
+    const W=engine.getRenderWidth(), H=engine.getRenderHeight(), k = canvas.clientWidth / W;
+    const vp = camera.viewport.toGlobal(W, H), tm = scene.getTransformMatrix(), I = BABYLON.Matrix.Identity();
+    const list = units.filter(u=>{ const p = BABYLON.Vector3.Project(new BABYLON.Vector3(u.x, height(u.x,u.z)+1, u.z), I, tm, vp);
+      const sx=p.x*k, sy=p.y*k; return p.z>0 && p.z<1 && sx>=x0 && sx<=x1 && sy>=y0 && sy<=y1; });
+    if (list.length) selectUnits(list); else { clearSelection(); updateSelPanel(true); }
+  } else {
+    const hit = pickAt(e.offsetX, e.offsetY);
+    if (hit && hit.kind==='unit'){
+      if (e.shiftKey){ if(!selected.includes(hit.ref)) selectUnits([...selected, hit.ref]); }
+      else selectUnits([hit.ref]);
+    } else if (hit && hit.kind==='bld' && hit.ref===townCenter){ selectBuilding(townCenter); }
+    else if (hit && (hit.kind==='res' || hit.kind==='bld' || hit.kind==='fire')){ clearSelection(); selInfo = hit.ref; updateSelPanel(true, hit.ref); }
+    else { clearSelection(); updateSelPanel(true); }
+  }
+  boxEl.style.display='none'; down=null; boxSel=false;
+});
+canvas.addEventListener('dblclick', e=>{
+  const hit = pickAt(e.offsetX, e.offsetY);
+  if (hit && hit.kind!=='ground'){
+    follow = hit; camTargetGoal = null;
+    zoomGoal = hit.kind==='unit' ? 7 : (hit.kind==='bld' ? 28 : 16);
+    if (hit.kind==='unit') selectUnits([hit.ref]);
+    toast("Caméra verrouillée — Échap pour libérer");
+  }
+});
+let zoomGoal = null;
+let hoverT = 0;
+function hoverCursor(x,y){
+  const now = performance.now(); if (now-hoverT < 90) return; hoverT = now;
+  const h = pickAt(x,y);
+  canvas.style.cursor = (h && h.kind==='unit') ? 'pointer' : (h && (h.kind==='res'||h.kind==='fire') && selected.length) ? 'crosshair' : 'default';
+}
+
+/* ============================================================
+   INTERFACE
+   ============================================================ */
+let selInfo = null;
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.style.opacity=1; clearTimeout(t._h); t._h=setTimeout(()=>t.style.opacity=0, 1800); }
+const STATE_TXT = { idle:"Se repose", moving:"Marche", toDrop:"Rapporte au campement", toRes:"Va récolter", toPile:"Prend du bois dans la réserve", toFire:"Apporte du bois au feu", feeding:"Alimente le feu", keep:"Veille sur le feu" };
+function fireHTML(){
+  const f = FIRE.fuel/FIRE.max, k = keepers();
+  const st = FIRE.out ? "❄️ Éteint — la tribu a froid (récolte ÷2, pas de naissance)" : f<0.3 ? "⚠️ Faiblit — il faut du bois !" : f<0.6 ? "Brûle normalement" : "Brûle vivement";
+  return `<div class="sub" style="margin-top:6px">🔥 Feu : ${Math.round(FIRE.fuel)} / ${FIRE.max} · ${st}</div>
+    <div class="bar"><i style="width:${Math.round(f*100)}%;background:${f<0.3?'#e2553b':f<0.6?'#e8a23a':'#f2c14e'}"></i></div>
+    <div class="sub" style="margin-top:4px">Gardiens du feu : ${k.length ? k.map(u=>u.name).join(", ") : "aucun"}</div>
+    <button class="btn" id="btnKeeper">🪵 Désigner un gardien du feu</button>`;
+}
+let panelSig = "";
+function updateSelPanel(force, info){
+  const el = $('sel'); let html="", sig="";
+  if (info !== undefined) selInfo = info; else if (force && (selected.length || selBuilding)) selInfo = null;
+  if (selected.length===1){
+    const u = selected[0];
+    const st = u.state==='gather' && u.target ? RES_INFO[u.target.type].verb : (STATE_TXT[u.state]||u.state);
+    const car = (u.carry>=1 && u.carryType ? ` · porte ${Math.floor(u.carry)}/10 ${RES_INFO[u.carryType].ico}` : "") + (u.job==='fire' ? ` · ${u.female?'gardienne':'gardien'} du feu 🔥` : "");
+    html = `<h3>${u.name} <span style="font-size:12px;opacity:.7">· ${u.label}</span></h3><div class="sub">${st}${car}</div><div class="hint">Clic droit sur un arbre, des baies ou du silex pour récolter · double-clic pour l'admirer de près.</div>`;
+    sig = "u"+u.id+st+Math.floor(u.carry);
+  } else if (selected.length>1){
+    const g = {}; selected.forEach(u=>{ const k = u.state==='gather'&&u.target ? RES_INFO[u.target.type].verb : (STATE_TXT[u.state]||u.state); g[k]=(g[k]||0)+1; });
+    html = `<h3>${selected.length} membres de la tribu</h3><div class="sub">${Object.entries(g).map(([k,v])=>`${v} × ${k}`).join("<br>")}</div>`;
+    sig = "m"+JSON.stringify(g);
+  } else if (selBuilding===townCenter){
+    const b = townCenter, can = stock.food>=50 && units.length+b.queue<POP_MAX && b.queue<5;
+    html = `<h3>Campement de la tribu</h3><div class="sub">Dépôt de toutes les ressources · accueille de nouveaux membres</div>${fireHTML()}
+      <button class="btn" id="btnTrain" ${can?'':'disabled'}>👶 Nouveau membre — 50 🍖 <span style="opacity:.6">(V)</span></button>
+      ${b.queue?`<div class="sub" style="margin-top:6px">En préparation : ${b.queue}</div><div class="bar"><i style="width:${Math.round(b.progress*100)}%"></i></div>`:''}
+      <div class="hint">Clic droit : point de ralliement des nouveaux membres.</div>`;
+    sig = "tc"+b.queue+Math.round(b.progress*50)+can+Math.round(FIRE.fuel)+keepers().length+FIRE.out;
+  } else if (selInfo){
+    const r = selInfo;
+    if (r.amount!==undefined){
+      html = `<h3>${r.label}</h3><div class="sub">${RES_INFO[r.type].ico} ${RES_INFO[r.type].name} : ${Math.ceil(Math.max(0,r.amount))} / ${r.max}</div><div class="hint">Sélectionnez des villageois puis clic droit ici.</div>`;
+      sig = "r"+Math.ceil(r.amount);
+    } else if (r===FIRE){
+      html = `<h3>Feu de camp</h3>${fireHTML()}<div class="hint">Le feu consomme du bois en continu. Clic droit dessus avec des membres sélectionnés pour qu'ils l'entretiennent.</div>`;
+      sig = "f"+Math.round(FIRE.fuel)+keepers().length+FIRE.out;
+    } else { html = `<h3>${r.label||"Bâtiment"}</h3><div class="sub">Abri de branchages · augmentera la population (bientôt)</div>`; sig="b"+r.label; }
+  } else {
+    html = `<h3>Âge de pierre</h3><div class="sub">Votre tribu s'éveille. Sélectionnez un de ses membres (clic gauche) ou le campement.</div><div class="hint">Clic gauche maintenu pour tourner · double-clic pour suivre · H pour l'aide</div>`;
+    sig = "none";
+  }
+  if (sig!==panelSig || force){ el.innerHTML = html; panelSig = sig;
+    const bt = $('btnTrain'); if (bt) bt.onclick = ()=>{ trainVillager(); updateSelPanel(true); };
+    const bk = $('btnKeeper'); if (bk) bk.onclick = ()=>{ assignKeeper(); updateSelPanel(true); };
+  }
+}
+let lastRes = "";
+function updateHUD(){
+  const s = `${Math.floor(stock.food)}|${Math.floor(stock.wood)}|${Math.floor(stock.gold)}|${Math.floor(stock.stone)}|${units.length}`;
+  if (s!==lastRes){ lastRes=s;
+    $('rFood').textContent=Math.floor(stock.food); $('rWood').textContent=Math.floor(stock.wood);
+    $('rStone').textContent=Math.floor(stock.stone);
+    $('rPop').textContent=units.length; $('rPopMax').textContent=POP_MAX; }
+}
+// textes flottants (+10 🪵)
+const floats = [];
+function floatText(x, z, txt){
+  const d = document.createElement('div'); d.textContent = txt;
+  Object.assign(d.style,{position:'fixed',pointerEvents:'none',font:'600 14px Inter,sans-serif',color:'#ffe9a8',textShadow:'0 1px 3px #000',zIndex:4,whiteSpace:'nowrap'});
+  document.body.appendChild(d); floats.push({ d, x, z, y:height(x,z)+2.5, t:0 });
+}
+function updateFloats(dt){
+  const W=engine.getRenderWidth(), H=engine.getRenderHeight(), k = canvas.clientWidth/W;
+  const vp = camera.viewport.toGlobal(W,H), tm = scene.getTransformMatrix(), I = BABYLON.Matrix.Identity();
+  for (let i=floats.length-1;i>=0;i--){ const f=floats[i]; f.t+=dt; f.y+=dt*1.2;
+    const p = BABYLON.Vector3.Project(new BABYLON.Vector3(f.x,f.y,f.z), I, tm, vp);
+    f.d.style.left = (p.x*k-20)+'px'; f.d.style.top = (p.y*k)+'px'; f.d.style.opacity = String(1-f.t/1.5);
+    if (f.t>1.5){ f.d.remove(); floats.splice(i,1); } }
+}
+// aide
+function toggleHelp(){ const h=$('help'), b=$('helpBtn'); const hid = h.classList.toggle('hidden'); b.style.display = hid ? 'block':'none'; }
+$('helpClose').onclick = toggleHelp; $('helpBtn').onclick = toggleHelp;
+$('btnOrbit').onclick = toggleOrbit; $('btnHome').onclick = goHome;
+
+/* ============================================================
+   HEURE DU JOUR
+   ============================================================ */
+function setTimeOfDay(v){ // v ∈ [0,100] : 6h → 20h
+  const hour = 6 + v/100*14;
+  $('todVal').textContent = Math.floor(hour)+" h"+(Math.round((hour%1)*60)?String(Math.round((hour%1)*60)).padStart(2,'0'):'');
+  const k = (hour-6)/14;                       // 0 lever, 1 coucher
+  const elev = Math.sin(k*Math.PI) * 1.05 + 0.04;   // rad
+  const az = lerp(-Math.PI*0.55, Math.PI*0.55, k) - Math.PI/2;
+  const dir = new BABYLON.Vector3(Math.cos(elev)*Math.cos(az), Math.sin(elev), Math.cos(elev)*Math.sin(az));
+  sun.direction = dir.scale(-1);
+  sun.position = dir.scale(220);
+  skyMat.sunPosition = dir.scale(100);
+  const low = 1 - smooth(0.05, 0.5, elev);       // 1 = soleil bas
+  sun.intensity = lerp(1.7, 0.75, low);
+  sun.diffuse = new BABYLON.Color3(1, lerp(0.95,0.62,low), lerp(0.86,0.38,low));
+  hemi.intensity = lerp(0.6, 0.38, low);
+  hemi.diffuse = new BABYLON.Color3(lerp(0.75,0.8,low), lerp(0.82,0.66,low), lerp(0.95,0.75,low));
+  hemi.groundColor = new BABYLON.Color3(0.32,0.3,0.24);
+  skyMat.turbidity = lerp(3.5, 8, low); skyMat.luminance = lerp(1.0, 0.85, low);
+  scene.fogColor = new BABYLON.Color3(lerp(0.7,0.85,low), lerp(0.8,0.64,low), lerp(0.9,0.55,low));
+  cloudMat.emissiveColor = new BABYLON.Color3(lerp(1,1,low), lerp(1,0.78,low), lerp(1,0.65,low));
+}
+$('todSlider').addEventListener('input', e=>setTimeOfDay(+e.target.value));
+setTimeOfDay(62);
+
+/* ============================================================
+   POST-TRAITEMENT
+   ============================================================ */
+const pipe = new BABYLON.DefaultRenderingPipeline("pipe", true, scene, [camera]);
+pipe.samples = engine.webGLVersion>=2 ? 4 : 1;
+pipe.fxaaEnabled = true;
+pipe.bloomEnabled = true; pipe.bloomThreshold = 0.82; pipe.bloomWeight = 0.22; pipe.bloomKernel = 48; pipe.bloomScale = 0.5;
+pipe.imageProcessingEnabled = true;
+pipe.imageProcessing.toneMappingEnabled = true;
+pipe.imageProcessing.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
+pipe.imageProcessing.exposure = 1.25; pipe.imageProcessing.contrast = 1.12;
+pipe.imageProcessing.vignetteEnabled = true; pipe.imageProcessing.vignetteWeight = 1.6; pipe.imageProcessing.vignetteStretch = 0.4;
+pipe.sharpenEnabled = true; pipe.sharpen.edgeAmount = 0.25;
+
+const fogPP = new BABYLON.PostProcess("fogOfWar", "fogOfWar", ["invProj","invView","mapSize","time"], ["depthSampler","fogSampler"], 1.0, camera);
+const _invP = new BABYLON.Matrix(), _invV = new BABYLON.Matrix();
+fogPP.onApply = eff => {
+  camera.getProjectionMatrix().invertToRef(_invP); camera.getViewMatrix().invertToRef(_invV);
+  eff.setTexture("depthSampler", depthRenderer.getDepthMap());
+  eff.setTexture("fogSampler", fogTex);
+  eff.setMatrix("invProj", _invP); eff.setMatrix("invView", _invV);
+  eff.setFloat("mapSize", MAP); eff.setFloat("time", ringPulse);
+};
+updateFog();
+/* ============================================================
+   BOUCLE
+   ============================================================ */
+let ringPulse = 0, fogT = 0;
+scene.onBeforeRenderObservable.add(()=>{
+  const dt = Math.min(0.05, engine.getDeltaTime()/1000);
+  for (const u of units) stepUnit(u, dt);
+  stepTC(dt);
+  updateFire(dt); updateFireVisual(ringPulse);
+  fogT -= dt; if (fogT<=0){ fogT = 0.12; updateFog(); }
+  updateCamera(dt);
+  if (zoomGoal){ camera.radius = lerp(camera.radius, zoomGoal, Math.min(1, dt*3)); if (Math.abs(camera.radius-zoomGoal)<0.3) zoomGoal=null; }
+  cloudTex.uOffset += dt*0.0035; cloudTex.vOffset += dt*0.0015;
+  if (marker.isVisible){ markerT -= dt; const s = 1 + (0.6-markerT)*1.2; marker.scaling.set(s,1,s); if(markerT<=0) marker.isVisible=false; }
+  ringPulse += dt; matRingB.alpha = 0.55 + Math.sin(ringPulse*4)*0.2;
+  updateHUD(); updateSelPanel(false); updateFloats(dt);
+});
+
+scene.executeWhenReady(()=>{
+  const l = $('loading'); l.style.opacity = 0; setTimeout(()=>l.remove(), 900);
+  updateSelPanel(true);
+});
+engine.runRenderLoop(()=>scene.render());
+window.addEventListener('resize', ()=>engine.resize());
+window.__babylonDemo = { FIRE, updateFog, assignKeeper, orderFeed, sim:(sec)=>{ for(let t=0;t<sec;t+=0.05){ for(const u of units) stepUnit(u,0.05); stepTC(0.05); updateFire(0.05);} }, scene, units, resources, stock, camera, townCenter, trainVillager, orderGather, selectUnits, selectBuilding };
+})();
+</script>
+</body>
+</html>
