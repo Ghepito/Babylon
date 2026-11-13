@@ -29,6 +29,7 @@
   nom: Bois sec
   description: Branches mortes, combustible.
   unite: kg
+  alimente: [ins.foyer]
   proprietes:
     thermique: {pouvoir_calorifique: {valeur: 15000, unite: kjkg}, inflammabilite: {valeur: 0.6}}
     physique: {humidite: {valeur: 0.15, cachee: true}}

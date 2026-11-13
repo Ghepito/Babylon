@@ -314,6 +314,10 @@ def valider(cx) -> Rapport:
                 rp.alerte("Structure", f"{nom(e['id'])} ne produit, ne satisfait, ne débloque et n'entretient rien")
         if e["type"] == "technique" and sum(1 for r in s if r["type"] == "RELEVE_DE") != 1:
             rp.erreur("Structure", f"{nom(e['id'])} doit relever d'exactement une compétence")
+    for e in E.values():
+        if e["type"] == "installation" and e["attributs"].get("consommation_kg_par_heure"):
+            if not any(r["type"] == "ALIMENTE" for r in entrantes[e["id"]]):
+                rp.erreur("Structure", f"{nom(e['id'])} consomme du combustible mais aucune ressource ne l'alimente (relation ALIMENTE)")
     parent = {r["source"]: r["cible"] for r in R if r["type"] == "SPECIALISE"}
     for c in parent:
         vu, x = set(), c

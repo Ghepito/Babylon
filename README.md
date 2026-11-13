@@ -8,7 +8,8 @@ Simulateur de survie et de développement d'une civilisation, de la survie primi
 
 - **Prototype actuel (démo 3, ancien concept RTS)** : [`prototypes/demo3-rts/`](prototypes/demo3-rts/index.html) — décor 3D, caméra, brouillard d'exploration, tribu animée, feu à entretenir.
 - **Réseau du référentiel (palier 1)** : [`vues/reseau.html`](vues/reseau.html) — besoins, ressources, techniques et procédés de la survie primitive, avec leur validation.
-- Le nouveau jeu (simulateur de survie) sera construit dans `src/`, palier par palier.
+- **Console de simulation (palier 2)** : [`vues/simulation.html`](vues/simulation.html) — le survivant solitaire sans 3D : besoins, actions, découvertes, IA autonome. Voir [`docs/moteur.md`](docs/moteur.md).
+- Le jeu en 3D réutilisera ce moteur au palier 3.
 
 Aucune installation : ouvrir `index.html` dans un navigateur récent (connexion internet nécessaire pour charger Babylon.js), ou via GitHub Pages.
 
@@ -20,6 +21,13 @@ python3 tools/referentiel.py      # construit, valide, exporte
 ```
 
 Détails : [`referentiel/README.md`](referentiel/README.md).
+
+## Moteur
+
+```bash
+npm test                     # scénarios automatiques (Node 20+)
+node tools/scenario.mjs 7    # récit d'une semaine en autonomie -> docs/scenario-solitaire.md
+```
 
 ## Méthode
 

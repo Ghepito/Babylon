@@ -6,6 +6,8 @@
 #        degrade (usure), satisfait / aggrave (besoins), debloque (connaissance acquise),
 #        entretient (installation), condition (JSON, ex. niveau de compétence).
 # utilise : un même « groupe » signifie « l'un OU l'autre » ; « optionnel: true » = bonus, non indispensable.
+# debloque : « probabilite » = chance d'apprendre à chaque essai (augmente avec l'expérimentation) ;
+#            « si: effet » = appris seulement si un effet « aggrave » s'est produit.
 
 # --- Eau et nourriture ----------------------------------------------------------
 - id: proc.puiser_eau
@@ -51,7 +53,8 @@
   consomme: {res.champignons: 0.2}
   satisfait: {bes.faim: 5}
   aggrave: {bes.sante: {quantite: 30, parametres: {probabilite: "propriete:res.champignons/biologique/toxicite"}}}
-  debloque: [con.champignons_toxiques]
+  debloque:
+    - {id: con.champignons_toxiques, si: effet}     # on ne l'apprend qu'en tombant malade
 
 # --- Bois, végétaux, pierres ----------------------------------------------------
 - id: proc.ramasser_bois_sec
@@ -111,7 +114,8 @@
   produit:
     res.eclats_silex: 4
     obj.eclat_tranchant: {quantite: 1, parametres: {probabilite: 0.3}}
-  debloque: [con.silex_tranchant]
+  debloque:
+    - {id: con.silex_tranchant, probabilite: 0.6}
 
 - id: proc.tailler_eclats
   nom: Tailler des éclats tranchants
@@ -137,7 +141,8 @@
   met_en_oeuvre: tech.experimentation
   duree: 120
   consomme: {res.bois_sec: 0.5}
-  debloque: [con.frottement_chaleur]
+  debloque:
+    - {id: con.frottement_chaleur, probabilite: 0.35}
 
 - id: proc.essai_braise
   nom: Faire tomber la braise dans des herbes sèches
@@ -146,7 +151,8 @@
   duree: 180
   requiert: [con.frottement_chaleur]
   consomme: {res.herbes_seches: 0.1, res.bois_sec: 0.5}
-  debloque: [con.combustion]
+  debloque:
+    - {id: con.combustion, probabilite: 0.5}
 
 - id: proc.fabriquer_necessaire_feu
   nom: Fabriquer un foret et une planchette

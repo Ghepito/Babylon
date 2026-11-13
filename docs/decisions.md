@@ -28,6 +28,7 @@ Source : [`conception-ia-externe.md`](conception-ia-externe.md) (synthèse du 13
 | 20 | Méthode | Jouabilité rapide, concepts testés palier par palier (13/11/2026) |
 | 21 | Outillage | Dépôt GitHub `Ghepito/Babylon` (13/11/2026) |
 | 22 | Moteur 3D | Babylon.js dans le navigateur (Unreal écarté, jugé trop complexe) |
+| 23 | Référentiel V1 | Structure, contenu de la phase 1 et vue réseau validés en l'état (13/11/2026) ; valeurs numériques toujours provisoires |
 
 ## PROPOSÉ (non validé)
 
@@ -37,4 +38,5 @@ Source : [`conception-ia-externe.md`](conception-ia-externe.md) (synthèse du 13
 - Saisie du référentiel en fichiers YAML (lisibles, commentables), construits en SQLite puis exportés en JSON/Excel par `tools/referentiel.py`.
 - Contenu de la phase 1 : 81 éléments (6 besoins, 8 sources, 10 ressources, 3 objets, 3 installations, 11 compétences, 9 techniques, 6 connaissances, 25 procédés) — voir `referentiel/donnees/phase1/`.
 - Valeurs numériques (durées, quantités, baisses des besoins) : provisoires, à calibrer en jouant.
+- Moteur (palier 2) : échelle de temps 1 s réelle = 1 min de jeu, règles de besoins, de santé, d'expérience et de découverte, IA par objectifs — voir [`moteur.md`](moteur.md).
 - Découpage en paliers : voir [`feuille-de-route.md`](feuille-de-route.md).

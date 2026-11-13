@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Babylon — Console de simulation</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--gold:#e8c27a;--ink:#f3ead8;--bg:#14100c;--panel:#1d1711;--line:rgba(232,194,122,.25);--muted:rgba(243,234,216,.55)}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,system-ui,sans-serif}
+  header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:3}
+  h1{font-family:Cinzel,serif;color:var(--gold);letter-spacing:.2em;font-size:18px;margin:0}
+  .horloge{font-weight:600;font-variant-numeric:tabular-nums;min-width:150px}
+  .muted{color:var(--muted)}
+  button{padding:6px 10px;border-radius:7px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--ink);font:13px Inter,sans-serif;cursor:pointer}
+  button:hover:not(:disabled){background:rgba(232,194,122,.18)}
+  button.on{background:rgba(232,194,122,.3);border-color:var(--gold)}
+  button:disabled{opacity:.4;cursor:default}
+  .groupe{display:flex;gap:4px;align-items:center}
+  main{display:grid;grid-template-columns:300px 1fr 320px;gap:12px;padding:12px 16px;align-items:start}
+  @media (max-width:1100px){main{grid-template-columns:1fr}}
+  section{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:12px}
+  h2{font-family:Cinzel,serif;color:var(--gold);font-size:14px;letter-spacing:.06em;margin:0 0 8px}
+  .besoin{margin:7px 0}
+  .besoin .l{display:flex;justify-content:space-between;font-size:13px}
+  .barre{height:8px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:3px}
+  .barre i{display:block;height:100%;border-radius:4px;transition:width .2s}
+  .action-en-cours{padding:8px 10px;border-radius:8px;background:rgba(232,194,122,.1);border:1px solid var(--line)}
+  .actions{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px}
+  .act{text-align:left;padding:8px 10px;line-height:1.3}
+  .act small{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
+  .act.ko{opacity:.55;cursor:help}
+  .act.ko small{color:#e8a08a}
+  .liste{margin:0;padding:0;list-style:none}
+  .liste li{display:flex;justify-content:space-between;gap:8px;padding:2px 0;border-bottom:1px dashed rgba(255,255,255,.05)}
+  .tag{display:inline-block;padding:1px 7px;border-radius:9px;font-size:11.5px;background:rgba(255,255,255,.07);margin:2px 3px 2px 0}
+  .tag.tech{background:rgba(91,143,214,.25)} .tag.con{background:rgba(155,127,224,.25)}
+  #journal{max-height:300px;overflow:auto;font-size:12.5px}
+  #journal div{padding:2px 0;border-bottom:1px dashed rgba(255,255,255,.05)}
+  #journal .t{color:var(--muted);font-variant-numeric:tabular-nums;margin-right:6px}
+  #journal .decouverte,#journal .connaissance{color:#c9b6ff} #journal .mort,#journal .besoin_critique{color:#ff9a8a}
+  #journal .competence{color:#9fe0c0} #journal .feu_eteint{color:#ffc27a}
+  .motif{font-size:12px;color:var(--muted);margin-top:6px}
+  .mort{padding:10px;border-radius:8px;background:rgba(220,80,60,.2);border:1px solid rgba(220,80,60,.5);margin-bottom:10px}
+  label.chk{display:flex;gap:6px;align-items:center;font-size:13px;cursor:pointer}
+</style>
+</head>
+<body>
+<header>
+  <h1>BABYLON</h1>
+  <span class="horloge" id="horloge">—</span>
+  <span class="muted" id="meteo"></span>
+  <div class="groupe" id="vitesses"></div>
+  <label class="chk"><input type="checkbox" id="ia"> IA autonome</label>
+  <div class="groupe">
+    <button id="bSauver">💾 Sauver</button>
+    <button id="bCharger">📂 Reprendre</button>
+    <button id="bNouvelle">↺ Nouvelle partie</button>
+  </div>
+  <span class="muted" style="margin-left:auto;font-size:12px">Palier 2 · moteur sans 3D · <a href="../index.html" style="color:var(--gold)">accueil</a></span>
+</header>
+<main>
+  <div>
+    <section><h2 id="nomPerso">Personnage</h2><div id="mortBox"></div><div id="besoins"></div></section>
+    <section><h2>Action en cours</h2><div id="action" class="muted">Aucune</div><div class="motif" id="motif"></div></section>
+    <section><h2>Compétences</h2><ul class="liste" id="competences"></ul></section>
+  </div>
+  <div>
+    <section><h2>Actions possibles</h2><div class="actions" id="possibles"></div></section>
+    <section><h2>Actions connues mais impossibles pour l'instant</h2><div class="actions" id="impossibles"></div><div class="muted" style="margin-top:8px;font-size:12.5px" id="inconnues"></div></section>
+    <section><h2>Journal</h2><label class="chk" style="margin-bottom:6px"><input type="checkbox" id="tout"> afficher toutes les actions</label><div id="journal"></div></section>
+  </div>
+  <div>
+    <section><h2>Inventaire</h2><ul class="liste" id="inventaire"></ul></section>
+    <section><h2>Objets</h2><ul class="liste" id="objets"></ul></section>
+    <section><h2>Installations</h2><ul class="liste" id="installations"></ul></section>
+    <section><h2>Savoirs</h2><div id="savoirs"></div></section>
+    <section><h2>Monde</h2><ul class="liste" id="sources"></ul></section>
+  </div>
+</main>
+<script type="module">
+import { Simulation, IA, Referentiel, palierDe } from '../src/sim/index.js';
+
+const $ = id => document.getElementById(id);
+const fmt = q => (Math.round(q * 100) / 100).toLocaleString('fr-FR');
+let REF, sim, ia, jsonRef;
+const CLE = 'babylon.sauvegarde.v1';
+
+try {
+  jsonRef = await (await fetch('../data/referentiel.json', { cache: 'no-store' })).json();
+} catch (e) {
+  document.body.innerHTML = `<p style="padding:30px">Impossible de lire <code>data/referentiel.json</code>. Ouvrez la page via GitHub Pages ou un serveur local (<code>python3 -m http.server</code>).</p>`;
+  throw e;
+}
+REF = new Referentiel(jsonRef);
+
+function nouvellePartie(graine = Math.floor(Math.random() * 1e6)) {
+  sim = new Simulation(REF, { graine });
+  ia = new IA(sim);
+  sim.vitesse = 1;
+  dernierJournal = 0; $('journal').innerHTML = '';
+  majVitesses(); rendre(true);
+}
+
+// ---- vitesse
+const VITESSES = [[0, '⏸'], [1, '×1'], [5, '×5'], [20, '×20'], [60, '×60'], [240, '×240']];
+$('vitesses').innerHTML = VITESSES.map(([v, l]) => `<button data-v="${v}" title="${v === 0 ? 'Pause active' : '1 s réelle = ' + v + ' min de jeu'}">${l}</button>`).join('');
+$('vitesses').onclick = e => { const b = e.target.closest('button'); if (b) { sim.vitesse = Number(b.dataset.v); majVitesses(); } };
+function majVitesses() { document.querySelectorAll('#vitesses button').forEach(b => b.classList.toggle('on', Number(b.dataset.v) === sim.vitesse)); }
+window.addEventListener('keydown', e => { if (e.code === 'Space' && e.target === document.body) { e.preventDefault(); sim.vitesse = sim.vitesse ? 0 : 1; majVitesses(); } });
+
+// ---- sauvegarde (navigateur)
+$('bSauver').onclick = () => { try { localStorage.setItem(CLE, JSON.stringify(sim.exporterEtat())); flash($('bSauver'), '✔ Sauvé'); } catch { flash($('bSauver'), 'Impossible'); } };
+$('bCharger').onclick = () => {
+  try { const e = JSON.parse(localStorage.getItem(CLE)); if (!e) return flash($('bCharger'), 'Rien'); sim = Simulation.restaurer(REF, e); ia = new IA(sim); $('journal').innerHTML = ''; dernierJournal = 0; majVitesses(); rendre(true); flash($('bCharger'), '✔ Repris'); }
+  catch { flash($('bCharger'), 'Impossible'); }
+};
+$('bNouvelle').onclick = () => nouvellePartie();
+function flash(b, t) { const o = b.textContent; b.textContent = t; setTimeout(() => b.textContent = o, 1200); }
+
+// ---- actions du joueur
+document.querySelector('main').addEventListener('click', e => {
+  const b = e.target.closest('button[data-proc]'); if (!b) return;
+  const r = sim.lancer(b.dataset.proc, { file: e.shiftKey });
+  if (!r.ok) flash(b, '✖ ' + r.manques[0].raison);
+  rendre(true);
+});
+
+// ---- boucle
+let avant = performance.now(), cumul = 0;
+function boucle(t) {
+  const dt = Math.min(0.25, (t - avant) / 1000); avant = t;
+  if ($('ia').checked && sim.vitesse > 0) ia.agir();
+  sim.avancer(dt);
+  cumul += dt; if (cumul > 0.2) { cumul = 0; rendre(); }
+  requestAnimationFrame(boucle);
+}
+
+// ---- rendu
+const COULEURS = { 'bes.soif': '#5fb7e8', 'bes.faim': '#e8a23a', 'bes.repos': '#9b7fe0', 'bes.chaleur': '#e2553b', 'bes.securite': '#7bc47f', 'bes.sante': '#f2c14e' };
+let dernierJournal = 0, signatureActions = '';
+function rendre(force) {
+  const p = sim.perso;
+  $('horloge').textContent = sim.horloge;
+  $('meteo').textContent = `${sim.nuit ? '🌙' : '☀️'} ${Math.round(sim.temperature)} °C`;
+  $('nomPerso').textContent = p.nom;
+  $('mortBox').innerHTML = p.vivant ? '' : `<div class="mort">☠️ ${sim.journal.find(e => e.type === 'mort')?.message}<br><small>Conséquences persistantes : relancez une nouvelle partie.</small></div>`;
+  $('besoins').innerHTML = REF.parType('besoin').map(b => {
+    const v = p.besoins[b.id], crit = v < (b.attributs?.critique_sous ?? 15);
+    return `<div class="besoin"><div class="l"><span>${b.nom}${crit ? ' ⚠️' : ''}</span><span>${Math.round(v)}</span></div><div class="barre"><i style="width:${v}%;background:${COULEURS[b.id] || '#aaa'};opacity:${crit ? 1 : .85}"></i></div></div>`;
+  }).join('');
+
+  const a = p.action;
+  $('action').innerHTML = a ? `<div class="action-en-cours"><b>${REF.nom(a.procede)}</b><div class="barre"><i style="width:${a.ecoule / a.duree * 100}%;background:var(--gold)"></i></div>
+     <div class="muted" style="font-size:12px;margin-top:4px">${Math.ceil((a.duree - a.ecoule) / 60)} min de jeu restantes ${p.file.length ? '· puis ' + p.file.map(id => REF.nom(id)).join(', ') : ''}</div>
+     <button style="margin-top:6px" id="bAnnuler">Interrompre</button></div>` : 'Aucune';
+  if (a) $('bAnnuler').onclick = () => { sim.annuler(); rendre(true); };
+  $('motif').textContent = $('ia').checked && ia.motif ? `IA : ${ia.motif}` : '';
+
+  // actions (on ne reconstruit que si quelque chose a changé, pour garder les boutons cliquables)
+  const connus = sim.procedesConnus();
+  const dispo = connus.map(pr => ({ pr, d: sim.disponibilite(pr.id) }));
+  const sig = dispo.map(x => x.pr.id + x.d.ok + (x.d.manques[0]?.raison || '')).join('|') + p.vivant;
+  if (sig !== signatureActions || force) {
+    signatureActions = sig;
+    const btn = ({ pr, d }) => `<button class="act ${d.ok ? '' : 'ko'}" data-proc="${pr.id}" ${d.ok ? '' : `title="${d.manques.map(m => m.raison).join('\n')}"`}>
+      ${pr.nom}<small>${d.ok ? `${duree(sim.dureeEffective(pr.id))} · ${resume(pr)}` : d.manques.map(m => m.raison).join(' · ')}</small></button>`;
+    $('possibles').innerHTML = dispo.filter(x => x.d.ok).map(btn).join('') || '<span class="muted">Rien pour l\'instant.</span>';
+    $('impossibles').innerHTML = dispo.filter(x => !x.d.ok).map(btn).join('') || '<span class="muted">Aucune.</span>';
+    const inconnues = REF.procedes.size - connus.length;
+    $('inconnues').textContent = inconnues ? `❔ ${inconnues} action(s) restent à découvrir par l'expérience.` : '✔ Toutes les actions de cette époque sont découvertes.';
+  }
+
+  $('inventaire').innerHTML = Object.entries(p.inventaire).map(([id, q]) => `<li><span>${REF.nom(id)}</span><span>${fmt(q)} ${REF.get(id).unite}</span></li>`).join('') || '<li class="muted">Vide</li>';
+  const parType = {}; for (const o of p.objets) (parType[o.id] ??= []).push(o.usure);
+  $('objets').innerHTML = Object.entries(parType).map(([id, u]) => `<li><span>${REF.nom(id)}${u.length > 1 ? ' ×' + u.length : ''}</span><span class="muted">usure ${u.length > 1 ? 'max ' : ''}${Math.round(Math.max(...u))} %</span></li>`).join('') || '<li class="muted">Aucun</li>';
+  $('installations').innerHTML = sim.monde.installations.map(i => `<li><span>${REF.nom(i.id)}</span><span class="muted">${i.allume !== undefined ? (i.allume ? `🔥 ${fmt(i.combustible)} kg` : 'éteint') : `usure ${Math.round(i.usure)} %`}</span></li>`).join('') || '<li class="muted">Aucune</li>';
+  $('savoirs').innerHTML = [...p.connait].map(id => `<span class="tag ${REF.type(id) === 'technique' ? 'tech' : 'con'}">${REF.nom(id)}</span>`).join('');
+  $('competences').innerHTML = Object.entries(p.competences).filter(([, v]) => v > 0.05).sort((a, b) => b[1] - a[1])
+    .map(([id, v]) => `<li><span>${REF.nom(id)}</span><span class="muted">${Math.floor(v)} · ${palierDe(v)}</span></li>`).join('') || '<li class="muted">Tout est à apprendre.</li>';
+  $('sources').innerHTML = Object.entries(sim.monde.sources).map(([id, s]) => `<li><span>${REF.nom(id)}</span><span class="muted">${s.stock === Infinity ? '∞' : fmt(s.stock)}</span></li>`).join('');
+
+  // journal
+  const tout = $('tout').checked, j = $('journal');
+  const nouveaux = sim.journal.slice(dernierJournal); dernierJournal = sim.journal.length;
+  for (const e of nouveaux) {
+    if (!tout && ['action_debut', 'action_fin', 'essai'].includes(e.type)) continue;
+    const d = document.createElement('div'); d.className = e.type;
+    d.innerHTML = `<span class="t">${e.horloge}</span>${e.message}`;
+    j.prepend(d);
+  }
+  while (j.children.length > 300) j.lastChild.remove();
+}
+function duree(s) { return s < 60 ? `${Math.round(s)} s` : s < 3600 ? `${Math.round(s / 60)} min` : `${(s / 3600).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} h`; }
+function resume(pr) {
+  const parts = [];
+  if (pr.produit.length) parts.push('→ ' + pr.produit.map(s => REF.nom(s.id).toLowerCase()).join(', '));
+  const sat = Object.keys(pr.satisfait); if (sat.length) parts.push('+ ' + sat.map(id => REF.nom(id).toLowerCase()).join(', '));
+  if (pr.debloque.some(c => !sim.perso.connait.has(c))) parts.push('🔬 expérience');
+  return parts.join(' · ');
+}
+
+nouvellePartie(1);
+requestAnimationFrame(boucle);
+window.__sim = () => sim;
+</script>
+</body>
+</html>

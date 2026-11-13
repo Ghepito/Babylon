@@ -1,6 +1,6 @@
 {
  "version_schema": "1.0-propose",
- "genere_le": "2026-11-13T16:47:11+00:00",
+ "genere_le": "2026-11-13T17:01:14+00:00",
  "types": [
   {
    "code": "besoin",
@@ -1322,129 +1322,138 @@
  "relations": [
   {
    "id": 1,
+   "type": "ALIMENTE",
+   "source": "res.bois_sec",
+   "cible": "ins.foyer"
+  },
+  {
+   "id": 2,
    "type": "REQUIERT",
    "source": "proc.puiser_eau",
    "cible": "src.lac"
   },
   {
-   "id": 2,
+   "id": 3,
    "type": "PRODUIT",
    "source": "proc.puiser_eau",
    "cible": "res.eau",
    "quantite": 0.5
   },
   {
-   "id": 3,
+   "id": 4,
    "type": "MET_EN_OEUVRE",
    "source": "proc.puiser_eau",
    "cible": "tech.ramassage"
   },
   {
-   "id": 4,
+   "id": 5,
    "type": "CONSOMME",
    "source": "proc.boire",
    "cible": "res.eau",
    "quantite": 0.5
   },
   {
-   "id": 5,
+   "id": 6,
    "type": "SATISFAIT",
    "source": "proc.boire",
    "cible": "bes.soif",
    "quantite": 25.0
   },
   {
-   "id": 6,
+   "id": 7,
    "type": "MET_EN_OEUVRE",
    "source": "proc.boire",
    "cible": "tech.gestes_vitaux"
   },
   {
-   "id": 7,
+   "id": 8,
    "type": "REQUIERT",
    "source": "proc.cueillir_baies",
    "cible": "src.buisson_baies"
   },
   {
-   "id": 8,
+   "id": 9,
    "type": "REQUIERT",
    "source": "proc.cueillir_baies",
    "cible": "con.plantes_comestibles"
   },
   {
-   "id": 9,
+   "id": 10,
    "type": "PRODUIT",
    "source": "proc.cueillir_baies",
    "cible": "res.baies",
    "quantite": 0.2
   },
   {
-   "id": 10,
+   "id": 11,
    "type": "MET_EN_OEUVRE",
    "source": "proc.cueillir_baies",
    "cible": "tech.ramassage"
   },
   {
-   "id": 11,
+   "id": 12,
    "type": "CONSOMME",
    "source": "proc.manger_baies",
    "cible": "res.baies",
    "quantite": 0.2
   },
   {
-   "id": 12,
+   "id": 13,
    "type": "SATISFAIT",
    "source": "proc.manger_baies",
    "cible": "bes.faim",
    "quantite": 10.0
   },
   {
-   "id": 13,
+   "id": 14,
    "type": "MET_EN_OEUVRE",
    "source": "proc.manger_baies",
    "cible": "tech.gestes_vitaux"
   },
   {
-   "id": 14,
+   "id": 15,
    "type": "REQUIERT",
    "source": "proc.ramasser_champignons",
    "cible": "src.sous_bois"
   },
   {
-   "id": 15,
+   "id": 16,
    "type": "PRODUIT",
    "source": "proc.ramasser_champignons",
    "cible": "res.champignons",
    "quantite": 0.2
   },
   {
-   "id": 16,
+   "id": 17,
    "type": "MET_EN_OEUVRE",
    "source": "proc.ramasser_champignons",
    "cible": "tech.ramassage"
   },
   {
-   "id": 17,
+   "id": 18,
    "type": "DEBLOQUE",
    "source": "proc.manger_champignons",
-   "cible": "con.champignons_toxiques"
+   "cible": "con.champignons_toxiques",
+   "parametres": {
+    "si": "effet"
+   }
   },
   {
-   "id": 18,
+   "id": 19,
    "type": "CONSOMME",
    "source": "proc.manger_champignons",
    "cible": "res.champignons",
    "quantite": 0.2
   },
   {
-   "id": 19,
+   "id": 20,
    "type": "SATISFAIT",
    "source": "proc.manger_champignons",
    "cible": "bes.faim",
    "quantite": 5.0
   },
   {
-   "id": 20,
+   "id": 21,
    "type": "AGGRAVE",
    "source": "proc.manger_champignons",
    "cible": "bes.sante",
@@ -1454,185 +1463,188 @@
    }
   },
   {
-   "id": 21,
+   "id": 22,
    "type": "MET_EN_OEUVRE",
    "source": "proc.manger_champignons",
    "cible": "tech.gestes_vitaux"
   },
   {
-   "id": 22,
+   "id": 23,
    "type": "REQUIERT",
    "source": "proc.ramasser_bois_sec",
    "cible": "src.bois_mort"
   },
   {
-   "id": 23,
+   "id": 24,
    "type": "PRODUIT",
    "source": "proc.ramasser_bois_sec",
    "cible": "res.bois_sec",
    "quantite": 2.0
   },
   {
-   "id": 24,
+   "id": 25,
    "type": "MET_EN_OEUVRE",
    "source": "proc.ramasser_bois_sec",
    "cible": "tech.ramassage"
   },
   {
-   "id": 25,
+   "id": 26,
    "type": "REQUIERT",
    "source": "proc.ramasser_herbes",
    "cible": "src.prairie"
   },
   {
-   "id": 26,
+   "id": 27,
    "type": "PRODUIT",
    "source": "proc.ramasser_herbes",
    "cible": "res.herbes_seches",
    "quantite": 0.2
   },
   {
-   "id": 27,
+   "id": 28,
    "type": "MET_EN_OEUVRE",
    "source": "proc.ramasser_herbes",
    "cible": "tech.ramassage"
   },
   {
-   "id": 28,
+   "id": 29,
    "type": "REQUIERT",
    "source": "proc.cueillir_feuillage",
    "cible": "src.arbre"
   },
   {
-   "id": 29,
+   "id": 30,
    "type": "PRODUIT",
    "source": "proc.cueillir_feuillage",
    "cible": "res.feuillage",
    "quantite": 1.0
   },
   {
-   "id": 30,
+   "id": 31,
    "type": "MET_EN_OEUVRE",
    "source": "proc.cueillir_feuillage",
    "cible": "tech.ramassage"
   },
   {
-   "id": 31,
+   "id": 32,
    "type": "REQUIERT",
    "source": "proc.ramasser_galet",
    "cible": "src.riviere_galets"
   },
   {
-   "id": 32,
+   "id": 33,
    "type": "PRODUIT",
    "source": "proc.ramasser_galet",
    "cible": "res.galet",
    "quantite": 1.0
   },
   {
-   "id": 33,
+   "id": 34,
    "type": "MET_EN_OEUVRE",
    "source": "proc.ramasser_galet",
    "cible": "tech.ramassage"
   },
   {
-   "id": 34,
+   "id": 35,
    "type": "REQUIERT",
    "source": "proc.ramasser_silex",
    "cible": "src.affleurement_silex"
   },
   {
-   "id": 35,
+   "id": 36,
    "type": "PRODUIT",
    "source": "proc.ramasser_silex",
    "cible": "res.silex_brut",
    "quantite": 2.0
   },
   {
-   "id": 36,
+   "id": 37,
    "type": "MET_EN_OEUVRE",
    "source": "proc.ramasser_silex",
    "cible": "tech.ramassage"
   },
   {
-   "id": 37,
+   "id": 38,
    "type": "REQUIERT",
    "source": "proc.couper_branches",
    "cible": "src.arbre"
   },
   {
-   "id": 38,
-   "type": "UTILISE",
-   "source": "proc.couper_branches",
-   "cible": "obj.eclat_tranchant",
-   "parametres": {
-    "groupe": "outil_coupant"
-   }
-  },
-  {
    "id": 39,
    "type": "UTILISE",
    "source": "proc.couper_branches",
-   "cible": "obj.biface",
+   "cible": "obj.eclat_tranchant",
    "parametres": {
     "groupe": "outil_coupant"
    }
   },
   {
    "id": 40,
+   "type": "UTILISE",
+   "source": "proc.couper_branches",
+   "cible": "obj.biface",
+   "parametres": {
+    "groupe": "outil_coupant"
+   }
+  },
+  {
+   "id": 41,
    "type": "PRODUIT",
    "source": "proc.couper_branches",
    "cible": "res.branches_vertes",
    "quantite": 3.0
   },
   {
-   "id": 41,
+   "id": 42,
    "type": "DEGRADE",
    "source": "proc.couper_branches",
    "cible": "obj.eclat_tranchant",
    "quantite": 8.0
   },
   {
-   "id": 42,
+   "id": 43,
    "type": "DEGRADE",
    "source": "proc.couper_branches",
    "cible": "obj.biface",
    "quantite": 2.0
   },
   {
-   "id": 43,
+   "id": 44,
    "type": "MET_EN_OEUVRE",
    "source": "proc.couper_branches",
    "cible": "tech.decoupe"
   },
   {
-   "id": 44,
+   "id": 45,
    "type": "UTILISE",
    "source": "proc.casser_silex",
    "cible": "res.galet"
   },
   {
-   "id": 45,
+   "id": 46,
    "type": "DEBLOQUE",
    "source": "proc.casser_silex",
-   "cible": "con.silex_tranchant"
+   "cible": "con.silex_tranchant",
+   "parametres": {
+    "probabilite": 0.6
+   }
   },
   {
-   "id": 46,
+   "id": 47,
    "type": "CONSOMME",
    "source": "proc.casser_silex",
    "cible": "res.silex_brut",
    "quantite": 1.0
   },
   {
-   "id": 47,
+   "id": 48,
    "type": "PRODUIT",
    "source": "proc.casser_silex",
    "cible": "res.eclats_silex",
    "quantite": 4.0
   },
   {
-   "id": 48,
+   "id": 49,
    "type": "PRODUIT",
    "source": "proc.casser_silex",
    "cible": "obj.eclat_tranchant",
@@ -1642,366 +1654,372 @@
    }
   },
   {
-   "id": 49,
+   "id": 50,
    "type": "MET_EN_OEUVRE",
    "source": "proc.casser_silex",
    "cible": "tech.experimentation"
   },
   {
-   "id": 50,
+   "id": 51,
    "type": "UTILISE",
    "source": "proc.tailler_eclats",
    "cible": "res.galet"
   },
   {
-   "id": 51,
+   "id": 52,
    "type": "CONSOMME",
    "source": "proc.tailler_eclats",
    "cible": "res.silex_brut",
    "quantite": 1.0
   },
   {
-   "id": 52,
+   "id": 53,
    "type": "PRODUIT",
    "source": "proc.tailler_eclats",
    "cible": "obj.eclat_tranchant",
    "quantite": 3.0
   },
   {
-   "id": 53,
+   "id": 54,
    "type": "PRODUIT",
    "source": "proc.tailler_eclats",
    "cible": "res.eclats_silex",
    "quantite": 5.0
   },
   {
-   "id": 54,
+   "id": 55,
    "type": "MET_EN_OEUVRE",
    "source": "proc.tailler_eclats",
    "cible": "tech.taille_percussion"
   },
   {
-   "id": 55,
+   "id": 56,
    "type": "UTILISE",
    "source": "proc.faconner_biface",
    "cible": "res.galet"
   },
   {
-   "id": 56,
+   "id": 57,
    "type": "CONSOMME",
    "source": "proc.faconner_biface",
    "cible": "res.silex_brut",
    "quantite": 1.5
   },
   {
-   "id": 57,
+   "id": 58,
    "type": "PRODUIT",
    "source": "proc.faconner_biface",
    "cible": "obj.biface",
    "quantite": 1.0
   },
   {
-   "id": 58,
+   "id": 59,
    "type": "PRODUIT",
    "source": "proc.faconner_biface",
    "cible": "res.eclats_silex",
    "quantite": 10.0
   },
   {
-   "id": 59,
+   "id": 60,
    "type": "MET_EN_OEUVRE",
    "source": "proc.faconner_biface",
    "cible": "tech.faconnage_bifacial"
   },
   {
-   "id": 60,
+   "id": 61,
    "type": "DEBLOQUE",
    "source": "proc.frotter_bois",
-   "cible": "con.frottement_chaleur"
+   "cible": "con.frottement_chaleur",
+   "parametres": {
+    "probabilite": 0.35
+   }
   },
   {
-   "id": 61,
+   "id": 62,
    "type": "CONSOMME",
    "source": "proc.frotter_bois",
    "cible": "res.bois_sec",
    "quantite": 0.5
   },
   {
-   "id": 62,
+   "id": 63,
    "type": "MET_EN_OEUVRE",
    "source": "proc.frotter_bois",
    "cible": "tech.experimentation"
   },
   {
-   "id": 63,
+   "id": 64,
    "type": "REQUIERT",
    "source": "proc.essai_braise",
    "cible": "con.frottement_chaleur"
   },
   {
-   "id": 64,
+   "id": 65,
    "type": "DEBLOQUE",
    "source": "proc.essai_braise",
-   "cible": "con.combustion"
+   "cible": "con.combustion",
+   "parametres": {
+    "probabilite": 0.5
+   }
   },
   {
-   "id": 65,
+   "id": 66,
    "type": "CONSOMME",
    "source": "proc.essai_braise",
    "cible": "res.herbes_seches",
    "quantite": 0.1
   },
   {
-   "id": 66,
+   "id": 67,
    "type": "CONSOMME",
    "source": "proc.essai_braise",
    "cible": "res.bois_sec",
    "quantite": 0.5
   },
   {
-   "id": 67,
+   "id": 68,
    "type": "MET_EN_OEUVRE",
    "source": "proc.essai_braise",
    "cible": "tech.experimentation"
   },
   {
-   "id": 68,
-   "type": "UTILISE",
-   "source": "proc.fabriquer_necessaire_feu",
-   "cible": "obj.eclat_tranchant",
-   "parametres": {
-    "groupe": "outil_coupant"
-   }
-  },
-  {
    "id": 69,
    "type": "UTILISE",
    "source": "proc.fabriquer_necessaire_feu",
-   "cible": "obj.biface",
+   "cible": "obj.eclat_tranchant",
    "parametres": {
     "groupe": "outil_coupant"
    }
   },
   {
    "id": 70,
+   "type": "UTILISE",
+   "source": "proc.fabriquer_necessaire_feu",
+   "cible": "obj.biface",
+   "parametres": {
+    "groupe": "outil_coupant"
+   }
+  },
+  {
+   "id": 71,
    "type": "CONSOMME",
    "source": "proc.fabriquer_necessaire_feu",
    "cible": "res.bois_sec",
    "quantite": 0.5
   },
   {
-   "id": 71,
+   "id": 72,
    "type": "PRODUIT",
    "source": "proc.fabriquer_necessaire_feu",
    "cible": "obj.necessaire_feu",
    "quantite": 1.0
   },
   {
-   "id": 72,
+   "id": 73,
    "type": "DEGRADE",
    "source": "proc.fabriquer_necessaire_feu",
    "cible": "obj.eclat_tranchant",
    "quantite": 8.0
   },
   {
-   "id": 73,
+   "id": 74,
    "type": "DEGRADE",
    "source": "proc.fabriquer_necessaire_feu",
    "cible": "obj.biface",
    "quantite": 2.0
   },
   {
-   "id": 74,
+   "id": 75,
    "type": "MET_EN_OEUVRE",
    "source": "proc.fabriquer_necessaire_feu",
    "cible": "tech.decoupe"
   },
   {
-   "id": 75,
+   "id": 76,
    "type": "UTILISE",
    "source": "proc.allumer_feu",
    "cible": "obj.necessaire_feu"
   },
   {
-   "id": 76,
+   "id": 77,
    "type": "CONSOMME",
    "source": "proc.allumer_feu",
    "cible": "res.herbes_seches",
    "quantite": 0.1
   },
   {
-   "id": 77,
+   "id": 78,
    "type": "CONSOMME",
    "source": "proc.allumer_feu",
    "cible": "res.bois_sec",
    "quantite": 1.0
   },
   {
-   "id": 78,
+   "id": 79,
    "type": "PRODUIT",
    "source": "proc.allumer_feu",
    "cible": "ins.foyer",
    "quantite": 1.0
   },
   {
-   "id": 79,
+   "id": 80,
    "type": "DEGRADE",
    "source": "proc.allumer_feu",
    "cible": "obj.necessaire_feu",
    "quantite": 10.0
   },
   {
-   "id": 80,
+   "id": 81,
    "type": "MET_EN_OEUVRE",
    "source": "proc.allumer_feu",
    "cible": "tech.allumage_friction"
   },
   {
-   "id": 81,
+   "id": 82,
    "type": "REQUIERT",
    "source": "proc.alimenter_feu",
    "cible": "ins.foyer"
   },
   {
-   "id": 82,
+   "id": 83,
    "type": "ENTRETIENT",
    "source": "proc.alimenter_feu",
    "cible": "ins.foyer"
   },
   {
-   "id": 83,
+   "id": 84,
    "type": "CONSOMME",
    "source": "proc.alimenter_feu",
    "cible": "res.bois_sec",
    "quantite": 1.0
   },
   {
-   "id": 84,
+   "id": 85,
    "type": "MET_EN_OEUVRE",
    "source": "proc.alimenter_feu",
    "cible": "tech.entretien_feu"
   },
   {
-   "id": 85,
+   "id": 86,
    "type": "REQUIERT",
    "source": "proc.se_rechauffer",
    "cible": "ins.foyer"
   },
   {
-   "id": 86,
+   "id": 87,
    "type": "SATISFAIT",
    "source": "proc.se_rechauffer",
    "cible": "bes.chaleur",
    "quantite": 20.0
   },
   {
-   "id": 87,
+   "id": 88,
    "type": "SATISFAIT",
    "source": "proc.se_rechauffer",
    "cible": "bes.securite",
    "quantite": 5.0
   },
   {
-   "id": 88,
+   "id": 89,
    "type": "MET_EN_OEUVRE",
    "source": "proc.se_rechauffer",
    "cible": "tech.gestes_vitaux"
   },
   {
-   "id": 89,
+   "id": 90,
    "type": "DEBLOQUE",
    "source": "proc.dormir_dehors",
    "cible": "con.protection_vent"
   },
   {
-   "id": 90,
+   "id": 91,
    "type": "SATISFAIT",
    "source": "proc.dormir_dehors",
    "cible": "bes.repos",
    "quantite": 40.0
   },
   {
-   "id": 91,
+   "id": 92,
    "type": "SATISFAIT",
    "source": "proc.dormir_dehors",
    "cible": "bes.sante",
    "quantite": 5.0
   },
   {
-   "id": 92,
+   "id": 93,
    "type": "AGGRAVE",
    "source": "proc.dormir_dehors",
    "cible": "bes.chaleur",
    "quantite": 20.0
   },
   {
-   "id": 93,
+   "id": 94,
    "type": "AGGRAVE",
    "source": "proc.dormir_dehors",
    "cible": "bes.securite",
    "quantite": 10.0
   },
   {
-   "id": 94,
+   "id": 95,
    "type": "MET_EN_OEUVRE",
    "source": "proc.dormir_dehors",
    "cible": "tech.gestes_vitaux"
   },
   {
-   "id": 95,
+   "id": 96,
    "type": "CONSOMME",
    "source": "proc.construire_abri",
    "cible": "res.branches_vertes",
    "quantite": 15.0
   },
   {
-   "id": 96,
+   "id": 97,
    "type": "CONSOMME",
    "source": "proc.construire_abri",
    "cible": "res.feuillage",
    "quantite": 8.0
   },
   {
-   "id": 97,
+   "id": 98,
    "type": "PRODUIT",
    "source": "proc.construire_abri",
    "cible": "ins.abri_branchages",
    "quantite": 1.0
   },
   {
-   "id": 98,
+   "id": 99,
    "type": "MET_EN_OEUVRE",
    "source": "proc.construire_abri",
    "cible": "tech.abri_appentis"
   },
   {
-   "id": 99,
+   "id": 100,
    "type": "CONSOMME",
    "source": "proc.faire_couche",
    "cible": "res.feuillage",
    "quantite": 4.0
   },
   {
-   "id": 100,
+   "id": 101,
    "type": "PRODUIT",
    "source": "proc.faire_couche",
    "cible": "ins.couche_feuillage",
    "quantite": 1.0
   },
   {
-   "id": 101,
+   "id": 102,
    "type": "MET_EN_OEUVRE",
    "source": "proc.faire_couche",
    "cible": "tech.abri_appentis"
   },
   {
-   "id": 102,
+   "id": 103,
    "type": "REQUIERT",
    "source": "proc.dormir_abri",
    "cible": "ins.abri_branchages"
   },
   {
-   "id": 103,
+   "id": 104,
    "type": "UTILISE",
    "source": "proc.dormir_abri",
    "cible": "ins.couche_feuillage",
@@ -2010,174 +2028,174 @@
    }
   },
   {
-   "id": 104,
+   "id": 105,
    "type": "SATISFAIT",
    "source": "proc.dormir_abri",
    "cible": "bes.repos",
    "quantite": 70.0
   },
   {
-   "id": 105,
+   "id": 106,
    "type": "SATISFAIT",
    "source": "proc.dormir_abri",
    "cible": "bes.securite",
    "quantite": 30.0
   },
   {
-   "id": 106,
+   "id": 107,
    "type": "SATISFAIT",
    "source": "proc.dormir_abri",
    "cible": "bes.chaleur",
    "quantite": 10.0
   },
   {
-   "id": 107,
+   "id": 108,
    "type": "SATISFAIT",
    "source": "proc.dormir_abri",
    "cible": "bes.sante",
    "quantite": 15.0
   },
   {
-   "id": 108,
+   "id": 109,
    "type": "MET_EN_OEUVRE",
    "source": "proc.dormir_abri",
    "cible": "tech.gestes_vitaux"
   },
   {
-   "id": 109,
+   "id": 110,
    "type": "SPECIALISE",
    "source": "comp.cueillette",
    "cible": "comp.survie"
   },
   {
-   "id": 110,
+   "id": 111,
    "type": "SPECIALISE",
    "source": "comp.experimentation",
    "cible": "comp.survie"
   },
   {
-   "id": 111,
+   "id": 112,
    "type": "SPECIALISE",
    "source": "comp.taille",
    "cible": "comp.travail_pierre"
   },
   {
-   "id": 112,
+   "id": 113,
    "type": "SPECIALISE",
    "source": "comp.allumage",
    "cible": "comp.maitrise_feu"
   },
   {
-   "id": 113,
+   "id": 114,
    "type": "SPECIALISE",
    "source": "comp.entretien_feu",
    "cible": "comp.maitrise_feu"
   },
   {
-   "id": 114,
+   "id": 115,
    "type": "SPECIALISE",
    "source": "comp.abris",
    "cible": "comp.construction"
   },
   {
-   "id": 115,
+   "id": 116,
    "type": "RELEVE_DE",
    "source": "tech.gestes_vitaux",
    "cible": "comp.survie"
   },
   {
-   "id": 116,
+   "id": 117,
    "type": "RELEVE_DE",
    "source": "tech.ramassage",
    "cible": "comp.cueillette"
   },
   {
-   "id": 117,
+   "id": 118,
    "type": "RELEVE_DE",
    "source": "tech.experimentation",
    "cible": "comp.experimentation"
   },
   {
-   "id": 118,
+   "id": 119,
    "type": "REQUIERT",
    "source": "tech.taille_percussion",
    "cible": "con.silex_tranchant",
    "contexte": "decouverte"
   },
   {
-   "id": 119,
+   "id": 120,
    "type": "RELEVE_DE",
    "source": "tech.taille_percussion",
    "cible": "comp.taille"
   },
   {
-   "id": 120,
+   "id": 121,
    "type": "REQUIERT",
    "source": "tech.faconnage_bifacial",
    "cible": "tech.taille_percussion",
    "contexte": "decouverte"
   },
   {
-   "id": 121,
+   "id": 122,
    "type": "RELEVE_DE",
    "source": "tech.faconnage_bifacial",
    "cible": "comp.taille"
   },
   {
-   "id": 122,
+   "id": 123,
    "type": "REQUIERT",
    "source": "tech.decoupe",
    "cible": "con.silex_tranchant",
    "contexte": "decouverte"
   },
   {
-   "id": 123,
+   "id": 124,
    "type": "RELEVE_DE",
    "source": "tech.decoupe",
    "cible": "comp.travail_bois"
   },
   {
-   "id": 124,
+   "id": 125,
    "type": "REQUIERT",
    "source": "tech.allumage_friction",
    "cible": "con.frottement_chaleur",
    "contexte": "decouverte"
   },
   {
-   "id": 125,
+   "id": 126,
    "type": "REQUIERT",
    "source": "tech.allumage_friction",
    "cible": "con.combustion",
    "contexte": "decouverte"
   },
   {
-   "id": 126,
+   "id": 127,
    "type": "RELEVE_DE",
    "source": "tech.allumage_friction",
    "cible": "comp.allumage"
   },
   {
-   "id": 127,
+   "id": 128,
    "type": "REQUIERT",
    "source": "tech.entretien_feu",
    "cible": "con.combustion",
    "contexte": "decouverte"
   },
   {
-   "id": 128,
+   "id": 129,
    "type": "RELEVE_DE",
    "source": "tech.entretien_feu",
    "cible": "comp.entretien_feu"
   },
   {
-   "id": 129,
+   "id": 130,
    "type": "REQUIERT",
    "source": "tech.abri_appentis",
    "cible": "con.protection_vent",
    "contexte": "decouverte"
   },
   {
-   "id": 130,
+   "id": 131,
    "type": "RELEVE_DE",
    "source": "tech.abri_appentis",
    "cible": "comp.abris"
